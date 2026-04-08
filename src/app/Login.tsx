@@ -1,8 +1,59 @@
 import {Lock,EyeOff,Eye, Mail} from "lucide-react";
 import {useState} from "react";
+import {type SubmitHandler, useForm} from "react-hook-form";
+import {useCookies} from "react-cookie";
+import {useNavigate} from "react-router-dom";
 
 export function LoginSide()
 {
+    interface UserLoginData
+    {
+        userEmail:string
+        password:string
+    }
+    const userData =
+    {
+        userNameAndSurname: "",
+        isLogged: false
+    };
+    const [cookies, setCookie] = useCookies(['userData']);
+
+    const navigate = useNavigate()
+    const{register,handleSubmit} = useForm<UserLoginData>()
+    const onSubmit: SubmitHandler<UserLoginData> = async (data) => {
+        try {
+            const response = await fetch('http://localhost:8080/api/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            });
+
+
+            if (response.ok) {
+                const userDataResponse = await response.json();
+
+
+                if(userDataResponse.success)
+                {
+                    userData.userNameAndSurname = userDataResponse.userName
+                    userData.isLogged = true
+                    setCookie('userData', userData, { path: '/', maxAge: 604800 });
+                    alert("Zalogowano" + cookies.userData.userNameAndSurname + cookies.userData.isLogged)
+                    navigate("/")
+                }
+                else
+                {
+                    alert("Hasło nie poprawne")
+                }
+            }
+        } catch (error) {
+            console.error("Błąd połączenia:", error);
+        }
+
+
+    }
     const [showLoginPassword, setShowLoginPassword] = useState(false);
 
     return(
@@ -13,7 +64,7 @@ export function LoginSide()
                   <p className="text-gray-600">Zaloguj się do swojego konta</p>
               </div>
 
-              <form className="space-y-6">
+              <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
                   <div>
                       <label className="block mb-2 text-gray-700">Email</label>
                       <div className="relative">
@@ -23,6 +74,7 @@ export function LoginSide()
                               type="email"
                               placeholder="twój@email.com"
                               className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                              {...register("userEmail")}
                           />
                       </div>
                   </div>
@@ -36,6 +88,7 @@ export function LoginSide()
                               type={showLoginPassword ? "text" : "password"}
                               placeholder="••••••••"
                               className="w-full pl-12 pr-12 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                              {...register("password")}
                           />
                           <button
                               type="button"

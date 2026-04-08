@@ -1,4 +1,60 @@
 import { Link } from 'react-router-dom';
+import {useCookies} from "react-cookie";
+
+function ButtonLogOut()
+{
+
+    const [cookies,setCookie] = useCookies(['userData']);
+    const hadleLogout = () =>{
+        const userData = {
+                isLogged: false,
+                userNameAndSurname: ""
+            };
+        alert("Wylogowano " + cookies.userData.userNameAndSurname )
+        setCookie('userData',userData,{path: '/'})
+    }
+
+
+    return(
+
+        <div className="px-6">
+            <button className="px-6 py-2.5 m-4 bg-blue-700 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors duration-200"
+                    onClick={hadleLogout}
+            >
+
+                <Link to="/mainLoginPage">Wyloguj</Link>
+            </button>
+            <button className="px-6 py-2.5 m-4 bg-white hover:bg-blue-6 00 border-blue-700 border-2 text-blue-700 hover:text-white rounded-lg font-medium transition-colors duration-200"
+            >
+
+                <Link to={`/profile/${cookies.userData.userNameAndSurname}`}>Profil Użytkownika</Link>
+            </button>
+        </div>
+
+    );
+
+
+}
+
+
+function ButtonLogin()
+{
+
+    const [cookies] = useCookies(['userData']);
+    if(cookies.userData.isLogged)
+    {
+        return(
+            <ButtonLogOut></ButtonLogOut>
+        );
+    }
+    else
+    {
+        return ( <button className="px-6 py-2.5 bg-blue-700 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors duration-200">
+            <Link to="/mainLoginPage">Zaloguj się</Link>
+        </button>);
+
+    }
+}
 
 
 export function Header()
@@ -16,9 +72,9 @@ export function Header()
                             <p className="text-sm text-gray-500">Znajdź idealnego korepetytora</p>
                         </div>
                     </div>
-                    <button className="px-6 py-2.5 bg-blue-700 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors duration-200">
-                       <Link to="/mainLoginPage">Zaloguj się</Link>
-                    </button>
+
+                    <ButtonLogin></ButtonLogin>
+
                 </div>
             </div>
         </header>
