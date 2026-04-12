@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import {useCookies} from "react-cookie";
+import {BoltIcon} from "lucide-react";
 
 function ButtonLogOut()
 {
@@ -17,6 +18,7 @@ function ButtonLogOut()
 
     return(
 
+    <div className="login flex">
         <div className="px-6">
             <button className="px-6 py-2.5 m-4 bg-blue-700 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors duration-200"
                     onClick={hadleLogout}
@@ -24,13 +26,23 @@ function ButtonLogOut()
 
                 <Link to="/mainLoginPage">Wyloguj</Link>
             </button>
-            <button className="px-6 py-2.5 m-4 bg-white hover:bg-blue-6 00 border-blue-700 border-2 text-blue-700 hover:text-white rounded-lg font-medium transition-colors duration-200"
-            >
 
+
+            <button className="px-6 py-2.5 m-4 bg-white hover:bg-blue-6 00 border-blue-700 border-2 text-blue-700 hover:text-white   hover:bg-blue-700 rounded-lg font-medium transition-colors duration-200">
                 <Link to={`/profile/${cookies.userData.userNameAndSurname}`}>Profil Użytkownika</Link>
             </button>
-        </div>
 
+
+
+
+        </div>
+            <button className="px-6 py-2.5 m-4 bg-white hover:bg-blue-6 00 border-blue-700 border-2 text-blue-700 hover:text-white hover:bg-blue-700 rounded-lg font-medium transition-colors duration-200">
+                <Link to={`/edycja-profilu`}>
+                <BoltIcon>
+                </BoltIcon>
+                </Link>
+            </button>
+    </div>
     );
 
 

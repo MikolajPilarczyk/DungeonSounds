@@ -6,6 +6,8 @@ import {Header} from "./Header.tsx"
 import {IsLoggedIn} from "./UserContext.tsx";
 import {useState} from "react";
 import {UserProfile} from "./userProfile.tsx";
+import {EditProfile} from "./EditProfile.tsx";
+import {PageNotFound} from "./page404.tsx";
 
 export default function App(){
     const [isLoggedIn,setIsLoggedIn] = useState(false);
@@ -18,6 +20,10 @@ export default function App(){
                     <Route path="/" element={<Home/>} />
                     <Route path="/mainLoginPage" element={<MainLoginPage/> } />
                     <Route path="/profile/:username" element={<UserProfile/> } />
+                      <Route path="/edycja-profilu" element={<EditProfile/> } />
+                      <Route path="*" element={<PageNotFound/> } />
+
+
                  </Routes>
               </CookiesProvider>
           </IsLoggedIn.Provider>
