@@ -1,7 +1,34 @@
 import {NewspaperIcon,Bold,Italic,List,Upload,File,ChevronDown } from "lucide-react";
+import {useState} from "react";
+
+
 
 
 export function AddMaterial() {
+
+    const [tags,setTags] = useState<string[]>([]);
+
+    const handleSubmit = (e:any) => {
+        e.preventDefault()
+        const form = e.currentTarget;
+        const input = form.elements.namedItem("tagInput") as HTMLInputElement;
+        const value = input.value.trim();
+
+        if (value) {
+            setTags([value, ...tags]);
+            form.reset();
+        }
+    }
+
+    interface FormData {
+        title: string;
+        description: string;
+        files: File;
+        category: string;
+        materialDegree: string;
+        cost: number;
+        tags: string[];
+    }
 
     return (<div>
 
@@ -97,9 +124,15 @@ export function AddMaterial() {
                                         <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest ml-1">Tagi</label>
                                         <div className="bg-white rounded-xl p-2 flex flex-wrap gap-2 min-h-[46px] items-center">
 
-                                            <input className="border-none focus:ring-0 text-sm flex-1 min-w-[80px] bg-gray-100 border-1 border-black h-10" placeholder="" type="text"/>
-                                            <label className={"text-gray-400 text-sm italic"}>Uwzględnij tagi aby inni łątwiej mogli
-                                                znaleść twoje materiały, schemat: tag1,tag2,tag3</label>
+                                            <form onSubmit={handleSubmit}>
+                                                <input className="border-1 rounded-xs focus:ring-0 text-sm flex-1 min-w-[80px] bg-gray-100 border-1 border-gray-200 p-1" placeholder="" type="text" name="tagInput"/>
+                                                <label className={"text-gray-400 text-sm italic"}>Uwzględnij tagi aby inni łątwiej mogli
+                                                    znaleść twoje materiały, schemat: tag1,tag2,tag3</label>
+                                                <button type="submit">Dodaj tag</button>
+                                            </form>
+
+
+
                                         </div>
                                     </div>
                                 </div>
