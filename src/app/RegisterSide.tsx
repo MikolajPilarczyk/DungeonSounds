@@ -47,9 +47,9 @@ export function RegisterSide()
 
     return(
         <div
-            className="p-8 md:p-12 flex flex-col justify-center bg-gradient-to-br from-blue-50 to-white">
+            className="p-8 md:p-12 flex flex-col justify-center bg-gradient-to-br from-yellow-50 to-white">
             <div className="mb-8">
-                <h2 className="text-3xl mb-2 text-blue-600">Dołącz do nas!</h2>
+                <h2 className="text-3xl mb-2 text-yellow-600">Dołącz do nas!</h2>
                 <p className="text-gray-600">Stwórz nowe konto</p>
             </div>
 
@@ -60,7 +60,7 @@ export function RegisterSide()
                     onClick={() => setAccountType('student')}
                     className={`p-4 rounded-lg border-2 transition-all ${
                         accountType === 'student'
-                            ? 'border-blue-600 bg-blue-50 text-blue-600'
+                            ? 'border-yellow-600 bg-yellow-50 text-yellow-600'
                             : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'
                     }`}
                 >
@@ -72,7 +72,7 @@ export function RegisterSide()
                     onClick={() => setAccountType('tutor')}
                     className={`p-4 rounded-lg border-2 transition-all ${
                         accountType === 'tutor'
-                            ? 'border-blue-600 bg-blue-50 text-blue-600'
+                            ? 'border-yellow-600 bg-yellow-50 text-yellow-600'
                             : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'
                     }`}
                 >
@@ -87,7 +87,7 @@ export function RegisterSide()
                     <input
                         type="text"
                         placeholder="Jan Kowalski"
-                        className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                        className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition"
                         {...register("userNameAndSurname")}
                         required
                     />
@@ -101,7 +101,7 @@ export function RegisterSide()
                         <input
                             type="email"
                             placeholder="twoj@email.com"
-                            className="w-full pl-12 pr-4 py-3 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                            className="w-full pl-12 pr-4 py-3 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition"
                             {...register("userEmail")}
                             required
                         />
@@ -116,7 +116,7 @@ export function RegisterSide()
                         <input
                             type={showRegisterPassword ? "text" : "password"}
                             placeholder="••••••••"
-                            className="w-full pl-12 pr-12 py-3 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                            className="w-full pl-12 pr-12 py-3 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition"
                             {...register("password")}
                             required
                         />
@@ -133,18 +133,18 @@ export function RegisterSide()
 
                 <label className="flex items-start gap-2 cursor-pointer">
                     <input type="checkbox"
-                           className="w-4 h-4 mt-1 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                           className="w-4 h-4 mt-1 text-yellow-600 rounded border-gray-300 focus:ring-yellow-500"
                            required
                            {...register("agreeToTerms")}
 
                     />
                     <span className="text-sm text-gray-600">
                     Akceptuję{' '}
-                        <a href="#" className="text-blue-600 hover:text-blue-700">
+                        <a href="#" className="text-yellow-600 hover:text-yellow-700">
                       regulamin
                     </a>{' '}
                         i{' '}
-                        <a href="#" className="text-blue-600 hover:text-blue-700">
+                        <a href="#" className="text-yellow-600 hover:text-yellow-700">
                       politykę prywatności
                     </a>
                   </span>
@@ -152,7 +152,7 @@ export function RegisterSide()
 
                 <button
                     type="submit"
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg transition-colors"
+                    className="w-full bg-yellow-600 hover:bg-yellow-700 text-white py-3 rounded-lg transition-colors"
                 >
                     Zarejestruj się jako {accountType === 'student' ? 'Uczeń' : 'Korepetytor'}
                 </button>

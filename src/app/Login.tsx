@@ -60,7 +60,7 @@ export function LoginSide()
       <>
           <div className="p-8 md:p-12 flex flex-col justify-center border-r border-gray-200">
               <div className="mb-8">
-                  <h1 className="text-3xl mb-2 text-blue-600">Witaj ponownie!</h1>
+                  <h1 className="text-3xl mb-2 text-yellow-600">Witaj ponownie!</h1>
                   <p className="text-gray-600">Zaloguj się do swojego konta</p>
               </div>
 
@@ -73,7 +73,7 @@ export function LoginSide()
                           <input
                               type="email"
                               placeholder="twój@email.com"
-                              className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                              className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition"
                               {...register("userEmail")}
                           />
                       </div>
@@ -87,7 +87,7 @@ export function LoginSide()
                           <input
                               type={showLoginPassword ? "text" : "password"}
                               placeholder="••••••••"
-                              className="w-full pl-12 pr-12 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                              className="w-full pl-12 pr-12 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition"
                               {...register("password")}
                           />
                           <button
@@ -104,18 +104,18 @@ export function LoginSide()
                   <div className="flex items-center justify-between">
                       <label className="flex items-center gap-2 cursor-pointer">
                           <input type="checkbox"
-                                 className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"/>
+                                 className="w-4 h-4 text-yellow-600 rounded border-gray-300 focus:ring-yellow-500"/>
                           <span className="text-sm text-gray-600">Zapamiętaj mnie</span>
                       </label>
                       <a href="#"
-                         className="text-sm text-blue-600 hover:text-blue-700 transition">
+                         className="text-sm text-yellow-600 hover:text-yellow-700 transition">
                           Zapomniałeś hasła?
                       </a>
                   </div>
 
                   <button
                       type="submit"
-                      className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg transition-colors"
+                      className="w-full bg-yellow-600 hover:bg-yellow-700 text-white py-3 rounded-lg transition-colors"
                   >
                       Zaloguj się
                   </button>

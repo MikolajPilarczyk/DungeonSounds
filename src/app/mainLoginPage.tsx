@@ -10,7 +10,7 @@ export function MainLoginPage()
         return (
             <div>
                 <div
-                    className="size-full flex items-center justify-center bg-gradient-to-b from-blue-50 to-white py-15">
+                    className="size-full flex items-center justify-center bg-gradient-to-b from-yellow-50 to-white py-15">
                     <div className="w-full max-w-6xl mx-auto p-4">
                         <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
                             <div className="grid md:grid-cols-2 min-h-[600px]">
@@ -32,7 +32,7 @@ export function MainLoginPage()
         <>
             <div>
                 <div
-                    className="size-full flex items-center justify-center bg-gradient-to-b from-blue-50 to-white py-15">
+                    className="size-full flex items-center justify-center bg-gradient-to-b from-yellow-50 to-white py-15">
                     <div className="w-full max-w-6xl mx-auto p-4">
                         <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
                             <div className="grid  min-h-[600px]">

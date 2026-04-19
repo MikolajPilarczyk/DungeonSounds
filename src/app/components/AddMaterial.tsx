@@ -116,7 +116,7 @@ export function AddMaterial() {
                             <p className="text-on-surface-variant mt-2 text-lg">Opublikuj swoją wiedze aby dzielić się nią z innymi!</p>
                         </div>
                         <div className="flex gap-3">
-                            <button className="px-8 py-2.5 text-sm font-bold bg-gradient-to-br from-blue-700 to-blue-900 text-white rounded-xl shadow-sm active:scale-95 transition-all po" onClick={handleFinalSubmit}>Opublikuj swój materiał!</button>
+                            <button className="px-8 py-2.5 text-sm font-bold bg-gradient-to-br from-yellow-700 to-yellow-900 text-white rounded-xl shadow-sm active:scale-95 transition-all po" onClick={handleFinalSubmit}>Opublikuj swój materiał!</button>
 
                         </div>
                     </div>
@@ -125,7 +125,7 @@ export function AddMaterial() {
                         <div className="lg:col-span-2 space-y-8  rounded-lg">
                             <section className="bg-white bg-surface-container-lowest p-8 rounded-lg shadow-sm border border-white/40">
                                 <h2 className="text-xl font-bold text-on-surface mb-6 flex items-center gap-2">
-                                    <div className="text-blue-900">
+                                    <div className="text-yellow-900">
                                         <NewspaperIcon />
                                     </div>
                                    Głowne Informacje
@@ -214,7 +214,7 @@ export function AddMaterial() {
                                                 <button type="submit" className={"text-gray-500  p-1 px-3 border-1 border-gray-300 bg-gray-100 hover:bg-gray-400 my-2 text-xs" }>Dodaj tag</button>
                                             </form>
                                             {tags.map((tag) => (
-                                                <button className={"bg-blue-400 text-gray-50 rounded-lg p-1 px-2  hover:bg-red-700 transition-all flex text-sm italic"} onClick={()=>deleteTag(tag)}><X size={18}></X>{tag}</button>
+                                                <button className={"bg-yellow-400 text-gray-50 rounded-lg p-1 px-2  hover:bg-red-700 transition-all flex text-sm italic"} onClick={()=>deleteTag(tag)}><X size={18}></X>{tag}</button>
                                             ))}
 
 
