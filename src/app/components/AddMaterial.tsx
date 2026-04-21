@@ -52,7 +52,7 @@ export function AddMaterial() {
         }
 
     }
-    const handleFinalSubmit = (e:any) => {
+    const handleFinalSubmit = async (e:any) => {
         e.preventDefault();
         const dataToSend = {
             ...formData,
@@ -61,6 +61,25 @@ export function AddMaterial() {
         };
         setFormData(dataToSend);
         console.log(formData.playlists);
+
+        try {
+            const response = await fetch('http://localhost:8080/api/upload', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(setFormData),
+            });
+
+            if(response.ok){
+                alert("Dodano pomyślnie")
+            }
+
+        } catch (error) {
+            console.error("Błąd połączenia:", error);
+        }
+
+
     }
     const addPlaylist = (e:any) => {
         e.preventDefault();

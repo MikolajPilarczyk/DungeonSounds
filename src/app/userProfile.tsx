@@ -14,7 +14,7 @@ export function UserProfile() {
     const [numberOfUsers, setNumberOfUsers] = useState<number>(0);
     const [userProfile, setUserProfile] = useState({
         name: username || "Ładowanie...",
-        avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop",
+        avatar: "",
         bio: "Ładowanie opisu...",
         totalLikes: 0,
         totalMaterials: 0,
@@ -89,7 +89,8 @@ export function UserProfile() {
                                                 className="w-full h-full rounded-full overflow-hidden bg-[#353534]">
                                                 <img alt="Character avatar" className="w-full h-full object-cover"
                                                      data-alt="Intense close up portrait of an elderly dwarven master bard with braided gray beard and ornate copper jewelry"
-                                                     src="https://lh3.googleusercontent.com/aida-public/AB6AXuDL3O-ldeP_vPkC5VX_PxjciVEEN-bdGoz1Ff9v-fxHJcpZKv-RJUsUuBU2ACQuIjtk0UbRK4umi8QcufFgwHSyw4Wd3llki8pkCuhT5mxuu8VU5F_8eEcosv5rxeZO3xBsXuyu4xngKs6Vx2nkrAEqIhjo23gPfXy3oKgZXatqLOAS-WbplDqgUHPm0R3F2HMUlIeNfaChpazlGYiuVkKltJTfpotqOQvDKqira9bvSktmRALiikiwziMNs1qaUc3dKeZwsiaHozmZ"/>
+                                                src={"awatar"}
+                                                />
                                             </div>
                                         </div>
                                         <h1 className="font-headline text-3xl font-bold tracking-tight text-[#ffb59c] uppercase text-center leading-tight mb-2">Dwarven
