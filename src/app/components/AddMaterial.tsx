@@ -2,9 +2,12 @@ import {NewspaperIcon,ChevronDown,X,BookAudio,AudioLines,Trash} from "lucide-rea
 import {useState} from "react";
 
 import {MainButton} from "./components.tsx";
+import {useCookies} from "react-cookie";
 
 
 export function AddMaterial() {
+   const [cookies] = useCookies(["userData"]);
+
     interface Song
     {
         title: string,
@@ -22,14 +25,16 @@ export function AddMaterial() {
     const [tempTitle, setTempTitle] = useState<string>("");
 
     interface FormData {
+        username: string;
         title: string;
         category: string;
         tags: string[];
         playlists: Playlist[]
     }
     const [formData,setFormData] = useState<FormData>({
+        username: cookies.userData.userNameAndSurname,
         title: "",
-        category: "",
+        category: "Karczma i Miasto",
         tags: [],
         playlists: []
     });
@@ -60,7 +65,7 @@ export function AddMaterial() {
             playlists: playlists
         };
         setFormData(dataToSend);
-        console.log(formData.playlists);
+        console.log(formData.username);
 
         try {
             const response = await fetch('http://localhost:8080/api/upload', {
@@ -68,9 +73,9 @@ export function AddMaterial() {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(formData),
+                body: JSON.stringify(dataToSend),
             });
-            console.log(JSON.stringify(formData));
+            console.log(JSON.stringify(dataToSend));
             if(response.ok){
                 alert("Dodano pomyślnie")
 
@@ -89,6 +94,7 @@ export function AddMaterial() {
             songs: []
         }
         setPlaylists([tempPlaylist,...playlists])
+        setTempTitle("");
     }
 
 
@@ -225,9 +231,9 @@ export function AddMaterial() {
                                     <div>
                                         <form>
                                             <input className="w-full bg-surface-container-low border-none  px-4 py-3.5 text-on-surface placeholder:text-outline focus:ring-2 focus:ring-primary/20
-                                        bg-[#353534] transition-all " name="playlistTitle"  onChange={(e)=> setTempTitle(e.target.value) }
+                                        bg-[#353534] transition-all " name="playlistTitle" value={tempTitle}  onChange={(e)=> setTempTitle(e.target.value) }
                                                    placeholder="Nadaj nazwe swojej playliście"  type="text"/>
-                                            <button className={"text-[#c7c6c6]  p-1 px-3 border-1  bg-[#353534] hover:bg-gray-400 my-2 text-xs"} onClick={addPlaylist}>Dodaj Playliste</button>
+                                            <button className={"text-[#c7c6c6]  p-1 px-3 border-1  bg-[#353534] hover:bg-gray-400 my-2 text-xs"}  onClick={addPlaylist}>Dodaj Playliste</button>
                                         </form>
 
                                     </div>
@@ -289,7 +295,7 @@ export function AddMaterial() {
                                         <div className="relative">
                                             <select className="w-full appearance-none bg-[#353534] border-none  px-4 py-3 text-sm text-on-surface focus:ring-2 focus:ring-primary/20 transition-all"
 
-                                                    name="category" onChange={handleChange}>
+                                                    name="category"  onChange={handleChange}>
                                                 {[...new Set(categories.map(c => c.group))].map(groupName => (
                                                     <optgroup key={groupName} label={groupName} >
                                                         {categories

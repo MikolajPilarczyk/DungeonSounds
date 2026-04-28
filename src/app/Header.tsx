@@ -86,13 +86,13 @@ export function Header()
         <nav
             className="fixed top-0 w-full z-50 flex justify-between items-center px-6 h-20 bg-[#131313] border-b-4 border-[#464747]">
             <div className="text-2xl font-black text-[#ffb59c] tracking-widest font-headline uppercase">
-                OBSIDIAN FORGE
+                Grymuar Fausta
             </div>
             <div className="hidden md:flex gap-8 items-center">
                 <Link className="text-[#c7c6c6] hover:text-[#ffb59c] font-headline tracking-tighter uppercase font-bold transition-all duration-300"
-                   to="/dodaj-wpis">FORGE</Link>
+                   to="/dodaj-wpis">Wykuj grymuar</Link>
                 <a className="text-[#c7c6c6] hover:text-[#ffb59c] font-headline tracking-tighter uppercase font-bold transition-all duration-300"
-                   href="#">ARMORY</a>
+                   href="#">Włącz muzyke</a>
                 <a className="text-[#c7c6c6] hover:text-[#ffb59c] font-headline tracking-tighter uppercase font-bold transition-all duration-300"
                    href="#">RUNES</a>
             </div>

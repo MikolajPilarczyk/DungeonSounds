@@ -1,6 +1,7 @@
 import {useEffect, useState} from "react";
 import {Link, useParams} from "react-router-dom";
 import {PlaylistWindow} from "./components/playlistWindow.tsx";
+import {data} from "autoprefixer";
 
 
 export function UserProfile() {
@@ -70,7 +71,66 @@ export function UserProfile() {
         if (username) {
             sendUsername();
         }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     }, [username]);
+
+    /*Sekcja z pobieraniem playlist z bazy danych*/
+
+
+
+    const[userPlaylistSets, setUserPlaylistSets] = useState([]);
+
+    useEffect(() => {
+        const getUserPlaylists = async () => {
+            try {
+                const response = await fetch('http://localhost:8080/api/user/playlists', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ usernameToFind: username }),
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    setUserPlaylistSets(data);
+                    console.log("Pobrane playlisty:",data);
+                } else {
+                    console.error("Błąd serwera:", response.status);
+                }
+            } catch (error) {
+                console.log("Błąd sieci:", error);
+            }
+        };
+
+        if (username) {
+            getUserPlaylists();
+        }
+
+    }, [username]);
+
+
+
+
     if (numberOfUsers) {
         return (
             <div className={"min-w-screen max-w-full min-h-screen max-h-full bg-gradient-to-b from-[#131313] to-[#0e0e0e]"}>
@@ -93,14 +153,12 @@ export function UserProfile() {
                                                 />
                                             </div>
                                         </div>
-                                        <h1 className="font-headline text-3xl font-bold tracking-tight text-[#ffb59c] uppercase text-center leading-tight mb-2">Dwarven
-                                            Battle-Bard</h1>
-                                        <p className="font-label text-[10px] tracking-[0.2em] text-[#c7c6c6] uppercase mb-6 font-bold">Master
-                                            of the Deep Echoes</p>
+                                        <h1 className="font-headline text-3xl font-bold tracking-tight text-[#ffb59c] uppercase text-center leading-tight mb-2">{userProfile.name}</h1>
+                                        <p className="font-label text-[10px] tracking-[0.2em] text-[#c7c6c6] uppercase mb-6 font-bold">Master of the Deep Echoes</p>
                                         <div className="w-full space-y-4 mb-8">
                                             <p className="text-[#e4beb9] text-sm text-center italic leading-relaxed">
                                                 {/*Wpis w bio*/}
-                                                <p>Wpis w bio</p>
+                                                <p>{userProfile.bio}</p>
                                             </p>
                                         </div>
                                         <div
@@ -191,7 +249,28 @@ export function UserProfile() {
 
                                         </div>
                                     ):(
-                                        <div>Udostępnione </div>
+                                        <div>Udostępnione
+                                            {
+                                                userPlaylistSets.length>0?(
+                                                    <div>
+                                                      Jest
+                                                        {
+                                                            userPlaylistSets.map((playlist:any) =>
+                                                                <div>
+                                                                    <PlaylistWindow title={playlist.title} vibe={playlist.category} tracks={playlist.playlists.length} />
+                                                                </div>
+
+                                                            )
+                                                        }
+                                                    </div>
+
+
+                                                ):(
+                                                    <div>Nie jest</div>
+                                                )
+                                            }
+
+                                        </div>
 
                                     )}
 
