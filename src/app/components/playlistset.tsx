@@ -104,14 +104,14 @@ export default function PlaylistSets() {
         }
     ];
 
-
-    const playlistID = useParams()
-    const[userPlaylistSets, setUserPlaylistSets] = useState([]);
-
+    const { id } = useParams();
+    const playlistID = Number(id);
+    const[userPlaylistSets, setUserPlaylistSets] = useState<any[]>([]);
+    const [playlistLenght,setPlaylistLenght] = useState();
     useEffect(() => {
         const getUserPlaylists = async () => {
             try {
-                const response = await fetch('http://localhost:8080/api/getPlaylists', {
+                const response = await fetch('http://localhost:8080/api/get-playlist', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -122,6 +122,7 @@ export default function PlaylistSets() {
                 if (response.ok) {
                     const data = await response.json();
                     setUserPlaylistSets(data);
+                    setPlaylistLenght(data[0].playlists.length)
                     console.log("Pobrane playlisty:",data);
                 } else {
                     console.error("Błąd serwera:", response.status);
@@ -145,7 +146,7 @@ export default function PlaylistSets() {
             <main className="max-w-7xl mx-auto px-6 pt-12 lg:pt-20">
                 <section className="mb-16 grid grid-cols-1 lg:grid-cols-2 gap-12 items-end">
                     <div>
-                        <h1 className="text-6xl lg:text-8xl font-black leading-none tracking-tighter mb-4 font-serif">PLAYLIST SETS</h1>
+                        <h1 className="text-6xl lg:text-8xl font-black leading-none tracking-tighter mb-4 font-serif">{userPlaylistSets[0]?.title}</h1>
                         <p className="text-xl text-[#c7c6c6] max-w-md">Ancient echoes bound in digital obsidian. Select your vault and awaken the forge.</p>
                     </div>
                     <div className="flex justify-end gap-4">
@@ -159,7 +160,20 @@ export default function PlaylistSets() {
                 </section>
 
                 <section className="grid grid-cols-1 gap-6 mb-12">
-                    {tomes.map(tome => <TomeItem key={tome.id} {...tome} />)}
+
+                    {userPlaylistSets[0]?.playlists?.map((playlist) => (
+                        <TomeItem
+                            key={playlist.id}
+                            id={playlist.id}
+                            title={playlist.title}
+                            hymns={playlistLenght}
+                            duration={0}
+                            icon={Shield}
+                            isLocked={false}
+                            tracks={playlist.songs}
+                            colorClass="border-[#ffb59c]"
+                        />
+                    ))}
                 </section>
 
 
