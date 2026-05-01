@@ -53,7 +53,7 @@ const TomeItem = ({ id, title, hymns, duration, icon: Icon, colorClass, isLocked
 
             {isExpanded && !isLocked && (
                 <div className="bg-[#0e0e0e] shadow-[inset_0_2px_4px_rgba(0,0,0,0.8)] border-t-2 border-[#5b403d]/20 p-8 space-y-4">
-                    <div className="grid grid-cols-12 gap-4 font-sans text-[10px] uppercase tracking-widest text-[#5b403d] mb-4 px-4">
+                    <div className="grid grid-cols-12 gap-4 font-sans text-[10px] uppercase tracking-widest text-[#ffb59c] mb-4 px-4">
                         <div className="col-span-1">#</div>
                         <div className="col-span-8">INCANTATION</div>
                         <div className="col-span-2 text-right">DURATION</div>
@@ -62,7 +62,7 @@ const TomeItem = ({ id, title, hymns, duration, icon: Icon, colorClass, isLocked
                     {tracks.map((track, idx) => (
                         <div key={idx} className="grid grid-cols-12 gap-4 p-4 items-center hover:bg-[#ffb59c]/5 transition-colors border-b border-[#5b403d]/10">
                             <div className="col-span-1 font-sans text-[#c7c6c6] opacity-40">{String(idx + 1).padStart(2, '0')}</div>
-                            <div className="col-span-8 font-sans font-bold text-[#e5e2e1]">{track.name}</div>
+                            <div className="col-span-8 font-sans font-bold text-[#e5e2e1]">{track.title}</div>
                             <div className="col-span-2 text-right font-sans text-xs text-[#c7c6c6] tracking-widest">{track.time}</div>
                             <div className="col-span-1 text-right">
                                 <button className="text-[#ffb59c] hover:scale-110 transition-transform">
@@ -160,14 +160,7 @@ export default function PlaylistSets() {
                         <h1 className="text-6xl lg:text-8xl font-black leading-none tracking-tighter mb-4 font-serif">{userPlaylistSets[0]?.title}</h1>
                         <p className="text-xl text-[#c7c6c6] max-w-md">Ancient echoes bound in digital obsidian. Select your vault and awaken the forge.</p>
                     </div>
-                    <div className="flex justify-end gap-4">
-                        <button className="bg-[#1c1b1b] border-2 border-[#ab8985] px-8 py-3 text-sm font-bold tracking-widest uppercase text-[#ffb59c] hover:bg-[#ffb59c]/10 transition-all duration-300">
-                            Sort by Rune
-                        </button>
-                        <button className="bg-gradient-to-tr from-[#a93500] to-[#ffb59c] px-8 py-3 text-sm font-bold tracking-widest uppercase text-[#5c1900] hover:opacity-90 transition-all duration-300">
-                            New Vault
-                        </button>
-                    </div>
+
                 </section>
 
                 <section className="grid grid-cols-1 gap-6 mb-12">
@@ -179,7 +172,7 @@ export default function PlaylistSets() {
                             title={playlist.title}
                             hymns={playlistLenght}
                             duration={0}
-                            icon={Shield}
+                            icon={Castle}
                             isLocked={false}
                             tracks={playlist.songs}
                             colorClass="border-[#ffb59c]"
