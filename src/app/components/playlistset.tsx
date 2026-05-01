@@ -6,6 +6,7 @@ import {
     Lock,
     ChevronDown,
     Play,
+    LucideStar
 
 } from 'lucide-react';
 import {useParams} from "react-router-dom";
@@ -38,8 +39,9 @@ const TomeItem = ({ id, title, hymns, duration, icon: Icon, colorClass, isLocked
                         <Icon size={36} fill="currentColor" fillOpacity={0.2} />
                     </div>
                     <div>
-                        <h2 className="font-serif text-3xl font-bold tracking-tight text-[#e5e2e1] uppercase">{title}</h2>
-                        <p className="font-sans text-xs uppercase tracking-widest text-[#c7c6c6] opacity-60">{hymns} HYMNS • {duration} MINUTES</p>
+                            <h2 className="font-serif text-3xl font-bold tracking-tight text-[#e5e2e1] uppercase">{title}</h2>
+                            <p className="font-sans text-xs uppercase tracking-widest text-[#c7c6c6] opacity-60">{hymns} HYMNS • {duration} MINUTES</p>
+
                     </div>
                 </div>
                 <div className="flex items-center gap-6">
@@ -59,7 +61,7 @@ const TomeItem = ({ id, title, hymns, duration, icon: Icon, colorClass, isLocked
                         <div className="col-span-2 text-right">DURATION</div>
                         <div className="col-span-1 text-right">ACTION</div>
                     </div>
-                    {tracks.map((track, idx) => (
+                    {tracks.map((track:any, idx:any) => (
                         <div key={idx} className="grid grid-cols-12 gap-4 p-4 items-center hover:bg-[#ffb59c]/5 transition-colors border-b border-[#5b403d]/10">
                             <div className="col-span-1 font-sans text-[#c7c6c6] opacity-40">{String(idx + 1).padStart(2, '0')}</div>
                             <div className="col-span-8 font-sans font-bold text-[#e5e2e1]">{track.title}</div>
@@ -78,47 +80,17 @@ const TomeItem = ({ id, title, hymns, duration, icon: Icon, colorClass, isLocked
 };
 
 export default function PlaylistSets() {
-    const tomes = [
-        {
-            id: 1,
-            title: "Echoes of the Deep Mine",
-            hymns: 12,
-            duration: 48,
-            icon: Shield,
-            colorClass: "border-[#ffb59c]",
-            isLocked: false,
-            tracks: [
-                { name: "HEART OF THE MOUNTAIN", time: "04:32" },
-                { name: "FORGE-FIRE RITUAL", time: "05:15" },
-                { name: "SHATTERED ANVIL HYMN", time: "03:48" }
-            ]
-        },
-        {
-            id: 2,
-            title: "Dragon's Hoard",
-            hymns: 24,
-            duration: 122,
-            icon: Flame,
-            colorClass: "border-[#ffb4ab]",
-            isLocked: false,
-            tracks: []
-        },
-        {
-            id: 3,
-            title: "The King Under the Hill",
-            hymns: 8,
-            duration: 34,
-            icon: Castle,
-            colorClass: "border-[#ffb59c]",
-            isLocked: true,
-            tracks: []
-        }
-    ];
+
+
+
+
 
     const { id } = useParams();
     const playlistID = Number(id);
     const[userPlaylistSets, setUserPlaylistSets] = useState<any[]>([]);
     const [playlistLenght,setPlaylistLenght] = useState();
+
+
     useEffect(() => {
         const getUserPlaylists = async () => {
             try {
@@ -149,7 +121,20 @@ export default function PlaylistSets() {
 
     }, [playlistID]);
 
+    const [isClicked, setIsClicked] = useState(false);
 
+
+    const changeLike = async () =>
+    {
+
+        setIsClicked(!isClicked);
+        try {
+
+        }
+        catch (error) {
+
+        }
+    }
 
     return (
         <div className="bg-[#131313] text-[#e5e2e1] min-h-screen pb-32 font-sans selection:bg-[#ffb59c]/30 selection:text-[#ffb59c] mt-20">
@@ -157,15 +142,35 @@ export default function PlaylistSets() {
             <main className="max-w-7xl mx-auto px-6 pt-12 lg:pt-20">
                 <section className="mb-16 grid grid-cols-1 lg:grid-cols-2 gap-12 items-end">
                     <div>
-                        <h1 className="text-6xl lg:text-8xl font-black leading-none tracking-tighter mb-4 font-serif">{userPlaylistSets[0]?.title}</h1>
-                        <p className="text-xl text-[#c7c6c6] max-w-md">Ancient echoes bound in digital obsidian. Select your vault and awaken the forge.</p>
+                        <h1 className="text-6xl lg:text-8xl font-black leading-none tracking-tighter mb-4 font-serif">
+                            {userPlaylistSets[0]?.title}
+                        </h1>
+                        <p className="text-xl text-[#c7c6c6] max-w-md">
+                            Ancient echoes bound in digital obsidian. Select your vault and awaken the forge.
+                        </p>
                     </div>
 
+                    <div className="flex lg:justify-end">
+                        {isClicked ? (
+                            <button className="scale-190 p-4 text-[#ffb59c] transition-all duration-150 ease-in-out  hover:scale-220  text-5xl lg:text-6xl" onClick={() => changeLike()}>
+                                <LucideStar />
+                            </button>
+
+
+
+                        ):(
+                            <button className="scale-190 text-gray-200 p-4 transition-all duration-150 ease-in-out  hover:scale-220 text-5xl lg:text-6xl" onClick={() => changeLike()}>
+                                <LucideStar />
+                            </button>
+
+                        )}
+
+                    </div>
                 </section>
 
                 <section className="grid grid-cols-1 gap-6 mb-12">
 
-                    {userPlaylistSets[0]?.playlists?.map((playlist) => (
+                    {userPlaylistSets[0]?.playlists?.map((playlist:any) => (
                         <TomeItem
                             key={playlist.id}
                             id={playlist.id}
