@@ -6,7 +6,7 @@ export function MainLoginPage()
 {
     const [cookie] = useCookies(["userData"])
 
-    if(!cookie.userData.isLogged)
+    if(!cookie?.userData?.isLogged)
         return (
             <div>
                 <div

@@ -1,7 +1,5 @@
 import {useEffect, useState} from 'react';
 import {
-    Shield,
-    Flame,
     Castle,
     Lock,
     ChevronDown,
