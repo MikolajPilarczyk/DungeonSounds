@@ -9,7 +9,7 @@ import {UserProfile} from "./userProfile.tsx";
 import {EditProfile} from "./EditProfile.tsx";
 import {PageNotFound} from "./page404.tsx";
 import {AddMaterial} from "./components/AddMaterial.tsx";
-import PlaylistSets from "./components/playlistset.tsx";
+import PlaylistSets from "./components/PlaylistView.tsx";
 
 
 export default function App(){

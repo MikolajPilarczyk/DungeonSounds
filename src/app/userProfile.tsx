@@ -138,12 +138,12 @@ export function UserProfile() {
                                                 />
                                             </div>
                                         </div>
-                                        <h1 className="font-headline text-3xl font-bold tracking-tight text-[#ffb59c] uppercase text-center leading-tight mb-2">{userProfile.name}</h1>
+                                        <h1 className="font-headline text-3xl font-bold tracking-tight text-[#ffb59c] uppercase text-center leading-tight mb-2">{userProfile?.name}</h1>
                                         <p className="font-label text-[10px] tracking-[0.2em] text-[#c7c6c6] uppercase mb-6 font-bold">Master of the Deep Echoes</p>
                                         <div className="w-full space-y-4 mb-8">
                                             <p className="text-[#e4beb9] text-sm text-center italic leading-relaxed">
                                                 {/*Wpis w bio*/}
-                                                <p>{userProfile.bio}</p>
+                                                <p>{userProfile?.bio}</p>
                                             </p>
                                         </div>
                                         <div
@@ -153,7 +153,7 @@ export function UserProfile() {
                                                 <span
                                                     className="font-label text-[10px] text-[#c7c6c6] uppercase font-bold tracking-widest">Wykute Playlisty</span>
                                                 <span
-                                                    className="font-headline text-xl text-[#ffb59c] font-bold">{userPlaylistSets.length}</span>
+                                                    className="font-headline text-xl text-[#ffb59c] font-bold">{userPlaylistSets?.length}</span>
                                             </div>
                                             <div
                                                 className="flex justify-between items-center bg-[#353534] p-3 metallic-chamfer">
@@ -247,7 +247,7 @@ export function UserProfile() {
                                     ):(
                                         <div>
                                             {
-                                                userPlaylistSets.length>0?(
+                                                userPlaylistSets?.length>0?(
                                                     <div className="grid grid-cols-3 gap-4 p-4">
 
                                                     {

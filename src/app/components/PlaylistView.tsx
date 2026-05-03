@@ -1,4 +1,5 @@
 import {useEffect, useState} from 'react';
+import {useParams} from "react-router-dom";
 import {
     Castle,
     Lock,
@@ -7,22 +8,10 @@ import {
     LucideStar
 
 } from 'lucide-react';
-import {useParams} from "react-router-dom";
+import {useCookies} from "react-cookie";
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-// --- Sub-komponent: Pojedyncza Playlista (Tome) ---
 const TomeItem = ({ id, title, hymns, duration, icon: Icon, colorClass, isLocked, tracks }) => {
     const [isExpanded, setIsExpanded] = useState(id === 1);
 
@@ -119,19 +108,107 @@ export default function PlaylistSets() {
 
     }, [playlistID]);
 
-    const [isClicked, setIsClicked] = useState(false);
+
+    const [cookies] = useCookies(['userData']);
+    const [isLiked, setIsLiked] = useState(false);
+    const [getDataToLike] = useState({
+        username: cookies?.userData?.userNameAndSurname,
+        playlistId: playlistID
+    });
+
+
+    useEffect(() => {
+        if (!getDataToLike || !getDataToLike.username || !getDataToLike.playlistId) {
+            return;
+        }
+
+        const getLikedPlaylists = async () => {
+            try {
+                const response = await fetch('http://localhost:8080/api/isLiked', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(getDataToLike),
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    setIsLiked(data);
+                } else {
+                    console.error("Błąd pobierania stanu polubienia");
+                }
+            } catch (error) {
+                console.error("Błąd sieci:", error);
+            }
+        };
+
+        getLikedPlaylists();
+
+    }, [getDataToLike?.username, getDataToLike?.playlistId]);
+
+
+
+
+
 
 
     const changeLike = async () =>
     {
 
-        setIsClicked(!isClicked);
-        try {
+
+
+        setIsLiked(!isLiked);
+        if(getDataToLike)
+        {
+            if(!isLiked){
+                console.log(getDataToLike);
+                try {
+                    const response = await fetch('http://localhost:8080/api/like-playlist', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(getDataToLike),
+                    });
+                    if (response.ok) {
+                        const data = await response.json();
+                        console.log(data);
+                        alert(data)
+                    }
+
+
+                }
+                catch (error) {
+
+                }
+
+            }
+            else
+            {
+                try {
+                    const response = await fetch('http://localhost:8080/api/unlike-playlist', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(getDataToLike),
+                    });
+                    if (response.ok) {
+                        const data = await response.json();
+                        console.log(data);
+                        alert(data)
+                    }
+
+
+                }
+                catch (error) {
+
+                }
+            }
 
         }
-        catch (error) {
 
-        }
     }
 
     return (
@@ -149,7 +226,7 @@ export default function PlaylistSets() {
                     </div>
 
                     <div className="flex lg:justify-end">
-                        {isClicked ? (
+                        {isLiked ? (
                             <button className="scale-190 p-4 text-[#ffb59c] transition-all duration-150 ease-in-out  hover:scale-220  text-5xl lg:text-6xl" onClick={() => changeLike()}>
                                 <LucideStar />
                             </button>
