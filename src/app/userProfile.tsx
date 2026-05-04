@@ -202,7 +202,7 @@ export function UserProfile() {
                                 </div>
                                 <div className="grid grid-cols-1 gap-3">
                                     <button
-                                        className="bg-gradient-to-r from-[#ffb59c] to-[#a93500] text-[#5c1900] font-label font-black uppercase py-4 tracking-widest active:scale-95 transition-transform">
+                                        className="bg-gradient-to-r from-[#ffb59c] to-[#ffb59c] text-[#5c1900] font-label font-black uppercase py-4 tracking-widest active:scale-95 transition-transform">
                                         <Link to={"/dodaj-wpis"}>
                                             Wykuj nową ballade
 

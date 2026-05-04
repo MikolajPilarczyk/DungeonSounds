@@ -222,7 +222,7 @@ export default function PlaylistSets() {
                             {userPlaylistSets[0]?.title}
                         </h1>
                         <p className="text-xl text-[#c7c6c6] max-w-md">
-                            Ancient echoes bound in digital obsidian. Select your vault and awaken the forge.
+                            {userPlaylistSets[0]?.description}
                         </p>
                     </div>
 

@@ -28,6 +28,7 @@ export function AddMaterial() {
         username: string;
         title: string;
         category: string;
+        description: string;
         tags: string[];
         playlists: Playlist[]
     }
@@ -35,6 +36,7 @@ export function AddMaterial() {
         username: cookies.userData.userNameAndSurname,
         title: "",
         category: "Karczma i Miasto",
+        description: "",
         tags: [],
         playlists: []
     });
@@ -235,13 +237,23 @@ export function AddMaterial() {
                                     <div className="text-[#ffb59c]">
                                         <NewspaperIcon />
                                     </div>
-                                    Głowne Informacje
+                                    Główne Informacje
                                 </h2>
                                 <div className="space-y-6">
                                     <div className="space-y-1.5">
                                         <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider ml-1">Tytuł</label>
                                         <input className="w-full bg-surface-container-low border-none  px-4 py-3.5 text-on-surface placeholder:text-outline focus:ring-2 focus:ring-primary/20
                                         bg-[#353534] transition-all " name="title" value={formData.title}   onChange={handleChange} placeholder="n.p Eksploracja szlaków grórskich"  type="text"/>
+                                    </div>
+
+
+
+                                    <div className="space-y-6">
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider ml-1">Opis</label>
+                                            <input className="w-full bg-surface-container-low border-none  px-4 py-3.5 text-on-surface placeholder:text-outline focus:ring-2 focus:ring-primary/20
+                                        bg-[#353534] transition-all " name="description" value={formData.description}   onChange={handleChange} placeholder="Opowiedź jakie przygody opisuje twój niesamowity zbiór ballad"  type="text"/>
+                                        </div>
                                     </div>
 
                                     {/*Dodawanie utworów*/}
