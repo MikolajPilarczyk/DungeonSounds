@@ -18,7 +18,8 @@ export function UserProfile() {
         bio: "Ładowanie opisu...",
         totalLikes: 0,
         totalMaterials: 0,
-        premiumMaterials: 0
+        premiumMaterials: 0,
+        accountType:""
     });
 
     useEffect(() => {
@@ -60,6 +61,7 @@ export function UserProfile() {
                         bio: result.bio || "Brak bio",
                         totalLikes: result.likes ,
                         totalMaterials: result.materials ,
+                        accountType: result.accountType
                     }));
                 }
             } catch (error) {
@@ -171,7 +173,7 @@ export function UserProfile() {
                                             </div>
                                         </div>
                                         <h1 className="font-headline text-3xl font-bold tracking-tight text-[#ffb59c] uppercase text-center leading-tight mb-2">{userProfile?.name}</h1>
-                                        <p className="font-label text-[10px] tracking-[0.2em] text-[#c7c6c6] uppercase mb-6 font-bold">Master of the Deep Echoes</p>
+                                        <p className="font-label text-[10px] tracking-[0.2em] text-[#c7c6c6] uppercase mb-6 font-bold">{userProfile?.accountType}</p>
                                         <div className="w-full space-y-4 mb-8">
                                             <p className="text-[#e4beb9] text-sm text-center italic leading-relaxed">
                                                 {/*Wpis w bio*/}
