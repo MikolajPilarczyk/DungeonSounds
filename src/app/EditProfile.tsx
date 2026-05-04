@@ -2,7 +2,7 @@ import {type SubmitHandler, useForm} from "react-hook-form";
 import {useCookies} from "react-cookie";
 import {toast} from "sonner";
 import {useRef, useState} from "react";
-import { Upload, Trash2 } from "lucide-react";
+import { Upload, Trash2, User } from "lucide-react"; // Dodano User dla lepszej ikony
 
 export function EditProfile()
 {
@@ -55,8 +55,8 @@ export function EditProfile()
                 const message = await response.text()
 
                 if (response.ok) {
-                    console.log("Zmieniono dane pomyślnie pomyślnie!");
-                    alert(message)
+                    console.log("Zmieniono dane pomyślnie!");
+                    toast.success(message); // Zmieniono alert na toast dla spójności
                     setCookie('userData', data.newUserName, {
                         path: '/',
                         maxAge: 3600 // 1 godzina
@@ -64,39 +64,41 @@ export function EditProfile()
                 }
             } catch (error) {
                 console.error("Błąd połączenia:", error);
+                toast.error("Wystąpił błąd podczas zmiany nazwy.");
             }
         }
         else
         {
-            alert("Nowa nazwa urzytkownika nie może być taka sama jak stara")
+            toast.error("Nowa nazwa użytkownika nie może być taka sama jak stara");
         }
 
     }
 
     const onBioChangeSubmit:SubmitHandler<BioFormData> = async (data)=>
     {
-            data.userNameAndSurname = cookies.userData.userNameAndSurname;
-            try {
-                const response = await fetch('http://localhost:8080/api/edit-bio', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(data),
-                });
+        data.userNameAndSurname = cookies.userData.userNameAndSurname;
+        try {
+            const response = await fetch('http://localhost:8080/api/edit-bio', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            });
 
-                const message = await response.text()
+            const message = await response.text()
 
-                if (response.ok) {
-                    console.log("Zmieniono dane pomyślnie pomyślnie!");
-                    alert(message)
-                }
-
+            if (response.ok) {
+                console.log("Zmieniono dane pomyślnie!");
+                toast.success(message); // Zmieniono alert na toast
             }
-            catch (error)
-            {
-                console.error("Błąd połączenia:", error);
-            }
+
+        }
+        catch (error)
+        {
+            console.error("Błąd połączenia:", error);
+            toast.error("Wystąpił błąd podczas zmiany bio.");
+        }
 
 
     }
@@ -107,7 +109,7 @@ export function EditProfile()
             const reader = new FileReader();
             reader.onloadend = () => {
                 setAvatarUrl(reader.result as string);
-                toast.success("Zdjęcie zostało wybrane");
+                toast.success("Magiczny zwój ze zdjęciem został wybrany");
             };
             reader.readAsDataURL(file);
         }
@@ -117,36 +119,42 @@ export function EditProfile()
         if (fileInputRef.current) {
             fileInputRef.current.value = "";
         }
-        toast.info("Zdjęcie profilowe zostało usunięte");
+        toast.info("Wizerunek profilowy został usunięty z kronik");
     };
 
-    if(cookies.userData.isLogged)
+    // Poprawiono literówkę 'urzytkownika' na 'użytkownika' w renderowaniu
+
+    if(cookies.userData?.isLogged)
     {
         return (
 
-            <div className="min-h-screen bg-[#f5f7fa] py-20">
+            // Tło strony: Ciemny motyw Fantasy (z palety)
+            <div className="min-h-screen bg-[#1c1c1c] py-20 font-sans text-[#e0e0e0]">
                 <div className="max-w-4xl mx-auto px-6 py-12">
-                    <div className="mb-10">
-                        <h1 className="text-[2rem] mb-2">Ustawienia profilu</h1>
-                        <p className="text-[#6b7280] text-[0.9375rem]">Dodaj kilka informacji o sobie</p>
+                    <div className="mb-10 border-b border-[#3a3a3a] pb-6">
+                        {/* Nagłówek: Kolor Primary (jasny róż) z palety */}
+                        <h1 className="text-[2.5rem] mb-2 font-serif text-[#ffb59c] tracking-tight">Krypta Profilu</h1>
+                        {/* Podtytuł: Kolor Secondary (szary) z palety */}
                     </div>
 
-                    <div className="bg-white rounded-2xl shadow-sm p-8">
-                        <form onSubmit={handleSubmitBio(onBioChangeSubmit)} className="space-y-8">
+                    {/* Główny kontener: Nieco jaśniejszy szary z palety, subtelne obramowanie Secondary */}
+                    <div className="bg-[#2a2a2a]  shadow-xl p-10 border border-[#3a3a3a]">
+                        <form onSubmit={handleSubmitBio(onBioChangeSubmit)} className="space-y-10">
                             {/* Avatar Section */}
                             <div>
-                                <h3 className="text-[1.125rem] mb-1">Zdjęcie Profilowe</h3>
-                                <p className="text-[#6b7280] text-[0.875rem] mb-6">Zmień swoje zdjęcie profilowe</p>
+                                <h3 className="text-[1.25rem] mb-1 font-semibold text-[#ffb59c]">Wizerunek</h3>
+                                <p className="text-[#8b8b8b] text-[0.9rem] mb-6">Zmień runiczny znak swego oblicza</p>
 
-                                <div className="flex items-center gap-6">
-                                    <div className="size-20 rounded-lg bg-[#e5e7eb] flex items-center justify-center overflow-hidden">
+                                <div className="flex items-center gap-8 border border-[#3a3a3a] p-6 bg-[#212121]">
+                                    <div className="size-24  bg-[#1c1c1c] flex items-center justify-center overflow-hidden border-2 border-[#8b8b8b] shadow-inner">
                                         {avatarUrl ? (
                                             <img src={avatarUrl} alt="Avatar" className="size-full object-cover" />
                                         ) : (
-                                            <div className="text-[#9ca3af] text-[2rem]">👤</div>
+                                            // Ikona domyślna w kolorze Secondary
+                                            <User className="size-12 text-[#8b8b8b]" />
                                         )}
                                     </div>
-                                    <div className="flex gap-3">
+                                    <div className="flex gap-4">
                                         <input
                                             ref={fileInputRef}
                                             type="file"
@@ -159,20 +167,22 @@ export function EditProfile()
                                             <button
                                                 type="button"
                                                 onClick={() => fileInputRef.current?.click()}
-                                                className="flex items-center gap-2 px-5 py-2.5 bg-[#3b82f6] text-white rounded-lg hover:bg-[#2563eb] transition-colors"
+                                                // Przycisk Primary: Jasny róż, ciemny tekst
+                                                className="flex items-center gap-2.5 px-6 py-3 bg-[#ffb59c] text-[#1c1c1c] font-bold hover:bg-[#ffbfa0] transition-all duration-300 shadow-md"
                                             >
-                                                <Upload className="size-4" />
-                                                Wybierz zdjęcie
+                                                <Upload className="size-5" />
+                                                Wybierz wizerunek
                                             </button>
                                         </label>
                                         {avatarUrl && (
                                             <button
                                                 type="button"
                                                 onClick={handleRemoveAvatar}
-                                                className="flex items-center gap-2 px-5 py-2.5 border border-[#d1d5db] text-[#374151] rounded-lg hover:bg-[#f9fafb] transition-colors"
+                                                // Przycisk Outlined: Obramowanie Secondary
+                                                className="flex items-center gap-2.5 px-6 py-3 border border-[#8b8b8b] text-[#8b8b8b]  hover:bg-[#3a3a3a] hover:text-[#ffb59c] transition-all duration-300"
                                             >
-                                                <Trash2 className="size-4" />
-                                                Usuń profilowe
+                                                <Trash2 className="size-5" />
+                                                Porzuć wizerunek
                                             </button>
                                         )}
                                     </div>
@@ -181,44 +191,50 @@ export function EditProfile()
 
                             {/* Bio Section */}
                             <div>
-                                <label htmlFor="bio" className="block text-[0.9375rem] mb-2">
-                                    Napisz coś o sobie
+                                <label htmlFor="bio" className="block text-[1rem] font-medium mb-3 text-[#e0e0e0]">
+                                    Runiczne podanie o sobie
                                 </label>
                                 <textarea
                                     id="bio"
-                                    rows={4}
+                                    rows={5}
                                     {...registerBio("bio")}
-                                    placeholder="Opowiedz coś o sobie..."
-                                    className="w-full px-4 py-3 border border-[#3b82f6] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3b82f6] resize-none"
+                                    placeholder="Opowiedz swoją przygode..."
+                                    // Pole tekstowe: Ciemne tło, obramowanie Secondary, focus Primary
+                                    className="w-full px-5 py-4 bg-[#1c1c1c] border border-[#3a3a3a]  text-[#e0e0e0] placeholder-[#555] focus:outline-none focus:ring-2 focus:ring-[#ffb59c] focus:border-[#ffb59c] resize-none transition-all"
                                 />
                             </div>
-                            <div className="pt-4">
+                            <div className="pt-2">
                                 <button
                                     type="submit"
-                                    className="px-8 py-3 bg-[#3b82f6] text-white rounded-lg hover:bg-[#2563eb] transition-colors"
+                                    // Przycisk Primary
+                                    className="px-10 py-3.5 bg-[#ffb59c] text-[#1c1c1c] font-bold  hover:bg-[#ffbfa0] transition-all duration-300 shadow-lg text-[1rem]"
                                 >
-                                    Zmień swoje bio
+                                    Wyryj swe bio
                                 </button>
                             </div>
                         </form>
 
-                            {/* Personal Info Section */}
-                            <form onSubmit={handleSubmitUser(onUserNameChangeSubmit)} className="space-y-8">
+                        <div className="my-12 border-t border-[#3a3a3a]"></div>
+
+                        {/* Personal Info Section */}
+                        <form onSubmit={handleSubmitUser(onUserNameChangeSubmit)} className="space-y-10">
 
                             <div>
+                                <h3 className="text-[1.25rem] mb-6 font-semibold text-[#ffb59c]">Miano Wywoławcze</h3>
 
-                                <div className="space-y-5 my-15">
+                                <div className="space-y-6">
                                     <div >
                                         <div>
-                                            <label htmlFor="firstName" className="block text-[0.875rem] mb-2 text-[#374151]">
-                                                Nazwa urzytkownika
+                                            <label htmlFor="firstName" className="block text-[1rem] font-medium mb-3 text-[#e0e0e0]">
+                                                Nazwa użytkownika
                                             </label>
                                             <input
                                                 id="firstName"
                                                 type="text"
-                                                placeholder="Zmień swoją nazwe urzytkownika"
+                                                placeholder="Wpisz swe nowe miano..."
                                                 {...registerUser("newUserName" )}
-                                                className="w-full px-4 py-2.5 border border-[#d1d5db] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3b82f6] focus:border-[#3b82f6]"
+                                                // Pole tekstowe
+                                                className="w-full px-5 py-3.5 bg-[#1c1c1c] border border-[#3a3a3a] -lg text-[#e0e0e0] placeholder-[#555] focus:outline-none focus:ring-2 focus:ring-[#ffb59c] focus:border-[#ffb59c] transition-all"
                                             />
 
                                         </div>
@@ -230,12 +246,13 @@ export function EditProfile()
 
 
                             {/* Submit Button */}
-                            <div className="pt-4">
+                            <div className="pt-2">
                                 <button
                                     type="submit"
-                                    className="px-8 py-3 bg-[#3b82f6] text-white rounded-lg hover:bg-[#2563eb] transition-colors"
+                                    // Przycisk Primary
+                                    className="px-10 py-3.5 bg-[#ffb59c] text-[#1c1c1c] font-bold  hover:bg-[#ffbfa0] transition-all duration-300 shadow-lg text-[1rem]"
                                 >
-                                    Zmień nazwe urzytkownika
+                                    Zmień swe miano
                                 </button>
                             </div>
                         </form>
@@ -246,10 +263,18 @@ export function EditProfile()
     }
     else return
     (
-        <div>
-            Zaloguj się aby mieć dostęp do tej podstrony
+        // Ekran błędu również w mrocznym stylu
+        <div className="min-h-screen bg-[#1c1c1c] flex items-center justify-center font-sans text-[#8b8b8b]">
+            <div className="bg-[#2a2a2a] p-10 -xl border border-[#3a3a3a] shadow-xl text-center">
+                <User className="size-16 mx-auto mb-6 text-[#ffb59c] opacity-50" />
+                <h2 className="text-2xl font-serif text-[#ffb59c] mb-4">Dostęp Wzbroniony</h2>
+                <p className="mb-8">Przejdź przez portal logowania, aby uzyskać dostęp do tej komnaty.</p>
+                <a href="/login" className="px-8 py-3 bg-[#3a3a3a] text-[#ffb59c]  hover:bg-[#4a4a4a] transition-all">
+                    Przejdź do Portalu
+                </a>
+            </div>
         </div>
-            );
+    );
 
 
 }

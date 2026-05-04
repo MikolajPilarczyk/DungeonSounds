@@ -5,7 +5,8 @@ import {
     Lock,
     ChevronDown,
     Play,
-    LucideStar
+    LucideStar,
+
 
 } from 'lucide-react';
 import {useCookies} from "react-cookie";

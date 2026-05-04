@@ -83,6 +83,7 @@ export function UserProfile() {
 
 
     const[userPlaylistSets, setUserPlaylistSets] = useState([]);
+    const[userLikedPlaylistSets, setUserLikedPlaylistSets] = useState([]);
 
     useEffect(() => {
         const getUserPlaylists = async () => {
@@ -109,6 +110,37 @@ export function UserProfile() {
 
         if (username) {
             getUserPlaylists();
+        }
+
+    }, [username]);
+
+
+
+    useEffect(() => {
+        const getUserLikePlaylists = async () => {
+            try {
+                const response = await fetch('http://localhost:8080/api/user/get-liked-playlists', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ usernameToFind: username }),
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    setUserLikedPlaylistSets(data);
+                    console.log("Pobrane playlisty:",data);
+                } else {
+                    console.error("Błąd serwera:", response.status);
+                }
+            } catch (error) {
+                console.log("Błąd sieci:", error);
+            }
+        };
+
+        if (username) {
+            getUserLikePlaylists();
         }
 
     }, [username]);
@@ -161,7 +193,7 @@ export function UserProfile() {
                                                     className="font-label text-[10px] text-[#c7c6c6] uppercase font-bold tracking-widest">Monety rzucone dla barda</span>
                                                 <span
                                                     className="font-headline text-xl text-[#ffb4ab] font-bold">
-                                                    Liczba Lików
+                                                    {userProfile?.totalLikes}
 
                                                 </span>
                                             </div>
@@ -228,16 +260,15 @@ export function UserProfile() {
                                     {pageLiked?(
                                         <div className="grid grid-cols-3 gap-4 p-4">
 
-                                        <PlaylistWindow  title={"Playlista dnd"} vibe={"Mroczny"} tracks={1}></PlaylistWindow>
-                                            <PlaylistWindow  title={"Playlista dnd"} vibe={"Mroczny"} tracks={1}></PlaylistWindow>
-                                            <PlaylistWindow  title={"Playlista dnd"} vibe={"Mroczny"} tracks={1}></PlaylistWindow>
-                                            <PlaylistWindow  title={"Playlista dnd"} vibe={"Mroczny"} tracks={1}></PlaylistWindow>
-                                            <PlaylistWindow  title={"Playlista dnd"} vibe={"Mroczny"} tracks={1}></PlaylistWindow>
-                                            <PlaylistWindow  title={"Playlista dnd"} vibe={"Mroczny"} tracks={1}></PlaylistWindow>
-                                            <PlaylistWindow  title={"Playlista dnd"} vibe={"Mroczny"} tracks={1}></PlaylistWindow>
-                                            <PlaylistWindow  title={"Playlista dnd"} vibe={"Mroczny"} tracks={1}></PlaylistWindow>
-                                            <PlaylistWindow  title={"Playlista dnd"} vibe={"Mroczny"} tracks={1}></PlaylistWindow>
 
+                                            {
+                                                userLikedPlaylistSets.map((playlist:any) =>
+                                                    <Link to={`/grymuar/${playlist.id}`}>
+                                                        <PlaylistWindow title={playlist.title} vibe={playlist.category} tracks={playlist.playlists.length} />
+                                                    </Link>
+
+                                                )
+                                            }
 
 
 
