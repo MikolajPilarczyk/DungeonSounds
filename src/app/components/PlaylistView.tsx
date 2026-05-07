@@ -1,21 +1,19 @@
-import {type ElementType, useEffect, useState} from 'react';
-import {useParams} from "react-router-dom";
+import { type ElementType, useEffect, useState } from 'react';
+import { useParams } from "react-router-dom";
 import {
     Castle,
-    Lock,
     ChevronDown,
-    Play,
+    Play as PlayIcon,
     LucideStar,
     PauseIcon
-
-
 } from 'lucide-react';
-import {useCookies} from "react-cookie";
+import { useCookies } from "react-cookie";
 
 interface Track {
     id: number;
     title: string;
     url: string;
+    time?: string;
 }
 
 interface TomeItemProps {
@@ -26,93 +24,65 @@ interface TomeItemProps {
     icon: ElementType;
     colorClass: string;
     tracks: Track[];
-    isExpanded: boolean;
-    openView: (id: number) => void;
+    onPlayToggle: (id: number) => void;
+    isPlayed: boolean;
 }
 
+const TomeItem = ({ id, title, hymns, duration, icon: Icon, colorClass, tracks, onPlayToggle, isPlayed }: TomeItemProps) => {
+    const [isTrackPlaying, setTrackPlaying] = useState<boolean[]>(() => tracks.map(() => false));
+    const [isExpanded, setExpanded] = useState(id === 1);
 
-const TomeItem = ({ id, title, hymns, duration, icon: Icon, colorClass, tracks, isExpanded,openView }: TomeItemProps) => {
-
-
-    const[isTrackPlaying, setTrackPlaying] = useState(Array.from({ length:tracks.length }, () => false));
-
-
-
-    const changePLay = (id:number) =>
-    {
-        const newTracksState = [...isTrackPlaying];
-
-        newTracksState.map((track,index) => {
-            newTracksState[index] = false;
-        })
-        newTracksState[id] = !isTrackPlaying[id];
-
+    const handleTrackClick = (idx: number) => {
+        const newTracksState = isTrackPlaying.map((_, i) => i === idx ? !isTrackPlaying[idx] : false);
         setTrackPlaying(newTracksState);
+        if (!isPlayed) {
+            onPlayToggle(id);
+        }
+    };
 
-    }
-
-    useEffect(()=>
-        {
-            if(!isExpanded){
-                const newTracksState = [...isTrackPlaying];
-
-                newTracksState.map((track,index) => {
-                    newTracksState[index] = false;
-                })
-
-                setTrackPlaying(newTracksState);
-
-
-            }
-        },[isExpanded]
-
-    )
-
-
-
+    useEffect(() => {
+        if (!isPlayed) {
+            setTrackPlaying(tracks.map(() => false));
+        }
+    }, [isPlayed, tracks]);
 
     return (
-        <div className={`group bg-[#1c1b1b] transition-all duration-300 hover:bg-[#2a2a2a] border-l-0  ${colorClass} overflow-hidden `}>
+        <div className={`bg-[#1c1b1b] border-l-4 ${colorClass} overflow-hidden transition-colors hover:bg-[#2a2a2a]`}>
             <div
                 className="p-8 flex flex-col md:flex-row md:items-center justify-between gap-6 cursor-pointer"
-                onClick={() => openView(id)}
+                onClick={() => setExpanded(!isExpanded)}
             >
                 <div className="flex items-center gap-6">
-                    <div className={`w-16 h-16 bg-[#353534] flex items-center justify-center border-2 border-[#5b403d] group-hover:border-current transition-colors ${colorClass.replace('border-', 'text-')}`}>
-                        <Icon size={36} fill="currentColor" fillOpacity={0.2} />
+                    <div className={`w-16 h-16 bg-[#353534] flex items-center justify-center border-2 border-[#5b403d]`}>
+                        <Icon size={36} className={colorClass.replace('border-', 'text-')} />
                     </div>
                     <div>
-                            <h2 className="font-serif text-3xl font-bold tracking-tight text-[#e5e2e1] uppercase">{title}</h2>
-                            <p className="font-sans text-xs uppercase tracking-widest text-[#c7c6c6] opacity-60">{hymns} HYMNS • {duration} MINUTES</p>
-
+                        <h2 className="font-serif text-3xl font-bold tracking-tight text-[#e5e2e1] uppercase">{title}</h2>
+                        <p className="font-sans text-xs uppercase tracking-widest text-[#c7c6c6] opacity-60">{hymns} HYMNS • {duration} MIN</p>
                     </div>
                 </div>
-                <div className="flex items-center gap-6">
-                        <ChevronDown size={28} className={`text-[#c7c6c6] transition-transform duration-500 ${isExpanded ? 'rotate-180' : ''}`} />
-                </div>
+                <ChevronDown size={28} className={`text-[#c7c6c6] transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} />
             </div>
 
-            {isExpanded &&  (
-                <div className="bg-[#0e0e0e] shadow-[inset_0_2px_4px_rgba(0,0,0,0.8)] border-t-2 border-[#5b403d]/20 p-8 space-y-4">
+            {isExpanded && (
+                <div className="bg-[#0e0e0e] border-t-2 border-[#5b403d]/20 p-8 space-y-4">
                     <div className="grid grid-cols-12 gap-4 font-sans text-[10px] uppercase tracking-widest text-[#ffb59c] mb-4 px-4">
                         <div className="col-span-1">#</div>
                         <div className="col-span-8">INCANTATION</div>
-                        <div className="col-span-2 text-right">DURATION</div>
+                        <div className="col-span-2 text-right">TIME</div>
                         <div className="col-span-1 text-right">ACTION</div>
                     </div>
-                    {tracks.map((track:any, idx:any) => (
-                        <div key={idx} className="grid grid-cols-12 gap-4 p-4 items-center hover:bg-[#ffb59c]/5 transition-colors border-b border-[#5b403d]/10">
-                            <div className="col-span-1 font-sans text-[#c7c6c6] opacity-40">{String(idx + 1).padStart(2, '0')}</div>
-                            <div className="col-span-8 font-sans font-bold text-[#e5e2e1]">{track.title}</div>
-                            <div className="col-span-2 text-right font-sans text-xs text-[#c7c6c6] tracking-widest">{track.time}</div>
+                    {tracks.map((track, idx) => (
+                        <div key={track.id || idx} className="grid grid-cols-12 gap-4 p-4 items-center hover:bg-[#ffb59c]/5 border-b border-[#5b403d]/10">
+                            <div className="col-span-1 text-[#c7c6c6] opacity-40">{String(idx + 1).padStart(2, '0')}</div>
+                            <div className="col-span-8 font-bold text-[#e5e2e1]">{track.title}</div>
+                            <div className="col-span-2 text-right text-xs text-[#c7c6c6]">{track.time || "3:00"}</div>
                             <div className="col-span-1 text-right">
-                                <button className="text-[#ffb59c] hover:scale-110 transition-transform" onClick={() => changePLay(idx)} >
-                                    {isTrackPlaying[idx] ?
-
-                                        (<PauseIcon size={18} fill="currentColor" />)
-                                        :(<Play size={18} fill="currentColor" />)
-
-                                    }
+                                <button
+                                    className="text-[#ffb59c] hover:scale-110 transition-transform"
+                                    onClick={(e) => { e.stopPropagation(); handleTrackClick(idx); }}
+                                >
+                                    {isTrackPlaying[idx] ? <PauseIcon size={18} /> : <PlayIcon size={18} />}
                                 </button>
                             </div>
                         </div>
@@ -124,222 +94,95 @@ const TomeItem = ({ id, title, hymns, duration, icon: Icon, colorClass, tracks, 
 };
 
 export default function PlaylistSets() {
-
-
-
-
-
     const { id } = useParams();
     const playlistID = Number(id);
-    const[userPlaylistSets, setUserPlaylistSets] = useState<any[]>([]);
-    const [playlistLenght,setPlaylistLenght] = useState(0);
-
+    const [userPlaylistSets, setUserPlaylistSets] = useState<any[]>([]);
+    const [activeTomeId, setActiveTomeId] = useState<number | null>(null);
+    const [cookies] = useCookies(['userData']);
+    const [isLiked, setIsLiked] = useState(false);
 
     useEffect(() => {
-        const getUserPlaylists = async () => {
+        const fetchData = async () => {
             try {
                 const response = await fetch('http://localhost:8080/api/get-playlist', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ playlistId: playlistID }),
                 });
-
                 if (response.ok) {
                     const data = await response.json();
                     setUserPlaylistSets(data);
-                    setPlaylistLenght(data[0].playlists.length)
-                    console.log("Pobrane playlisty:",data);
-                } else {
-                    console.error("Błąd serwera:", response.status);
                 }
             } catch (error) {
-                console.log("Błąd sieci:", error);
+                console.error(error);
             }
         };
-
-        if (playlistID) {
-            getUserPlaylists();
-        }
-
+        if (playlistID) fetchData();
     }, [playlistID]);
 
-
-    const [cookies] = useCookies(['userData']);
-    const [isLiked, setIsLiked] = useState(false);
-    const [getDataToLike] = useState({
-        username: cookies?.userData?.userNameAndSurname,
-        playlistId: playlistID
-    });
-
-
     useEffect(() => {
-        if (!getDataToLike || !getDataToLike.username || !getDataToLike.playlistId) {
-            return;
-        }
-
-        const getLikedPlaylists = async () => {
-            try {
-                const response = await fetch('http://localhost:8080/api/isLiked', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(getDataToLike),
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    setIsLiked(data);
-                } else {
-                    console.error("Błąd pobierania stanu polubienia");
-                }
-            } catch (error) {
-                console.error("Błąd sieci:", error);
-            }
+        if (!cookies.userData?.userNameAndSurname || !playlistID) return;
+        const checkLiked = async () => {
+            const resp = await fetch('http://localhost:8080/api/isLiked', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: cookies.userData.userNameAndSurname, playlistId: playlistID }),
+            });
+            if (resp.ok) setIsLiked(await resp.json());
         };
+        checkLiked();
+    }, [playlistID, cookies.userData]);
 
-        getLikedPlaylists();
+    const handleLikeToggle = async () => {
+        const prevStatus = isLiked;
+        setIsLiked(!prevStatus);
+        const endpoint = !prevStatus ? 'like-playlist' : 'unlike-playlist';
+        await fetch(`http://localhost:8080/api/${endpoint}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username: cookies.userData.userNameAndSurname, playlistId: playlistID }),
+        });
+    };
 
-    }, [getDataToLike?.username, getDataToLike?.playlistId]);
-
-
-
-
-
-
-
-    const changeLike = async () =>
-    {
-
-
-
-        setIsLiked(!isLiked);
-        if(getDataToLike)
-        {
-            if(!isLiked){
-                console.log(getDataToLike);
-                try {
-                    const response = await fetch('http://localhost:8080/api/like-playlist', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(getDataToLike),
-                    });
-                    if (response.ok) {
-                        const data = await response.json();
-                        console.log(data);
-                        alert(data)
-                    }
-
-
-                }
-                catch (error) {
-
-                }
-
-            }
-            else
-            {
-                try {
-                    const response = await fetch('http://localhost:8080/api/unlike-playlist', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(getDataToLike),
-                    });
-                    if (response.ok) {
-                        const data = await response.json();
-                        console.log(data);
-                        alert(data)
-                    }
-
-
-                }
-                catch (error) {
-
-                }
-            }
-
-        }
-
-    }
-    const [isExpanded, setExpanded] =  useState(Array.from({ length: playlistLenght }, () => false));
-
-    const Expand = (id: number) =>
-    {
-            const nexExpansion = [...isExpanded];
-
-            nexExpansion.map((track,index) => {
-                nexExpansion[index] = false;
-            })
-            nexExpansion[id] = !isExpanded[id];
-
-        setExpanded(nexExpansion);
-
-
-
-    }
+    const onPlayToggle = (tomeId: number) => {
+        setActiveTomeId(prev => prev === tomeId ? null : tomeId);
+    };
 
     return (
-        <div className="bg-[#131313] text-[#e5e2e1] min-h-screen pb-32 font-sans selection:bg-[#ffb59c]/30 selection:text-[#ffb59c] mt-20">
-
-            <main className="max-w-7xl mx-auto px-6 pt-12 lg:pt-20">
+        <div className="bg-[#131313] text-[#e5e2e1] min-h-screen pb-32 mt-20">
+            <main className="max-w-7xl mx-auto px-6 pt-12">
                 <section className="mb-16 grid grid-cols-1 lg:grid-cols-2 gap-12 items-end">
                     <div>
-                        <h1 className="text-6xl lg:text-8xl font-black leading-none tracking-tighter mb-4 font-serif">
-                            {userPlaylistSets[0]?.title}
-                        </h1>
-                        <p className="text-xl text-[#c7c6c6] max-w-md">
-                            {userPlaylistSets[0]?.description}
-                        </p>
+                        <h1 className="text-6xl lg:text-8xl font-black mb-4 font-serif">{userPlaylistSets[0]?.title}</h1>
+                        <p className="text-xl text-[#c7c6c6]">{userPlaylistSets[0]?.description}</p>
                     </div>
-
                     <div className="flex lg:justify-end">
-                        {isLiked ? (
-                            <button className="scale-190 p-4 text-[#ffb59c] transition-all duration-150 ease-in-out  hover:scale-220  text-5xl lg:text-6xl" onClick={() => changeLike()}>
-                                <LucideStar />
-                            </button>
-
-
-
-                        ):(
-                            <button className="scale-190 text-gray-200 p-4 transition-all duration-150 ease-in-out  hover:scale-220 text-5xl lg:text-6xl" onClick={() => changeLike()}>
-                                <LucideStar />
-                            </button>
-
-                        )}
-
+                        <button
+                            className={`scale-150 p-4 transition-transform hover:scale-175 ${isLiked ? 'text-[#ffb59c]' : 'text-gray-500'}`}
+                            onClick={handleLikeToggle}
+                        >
+                            <LucideStar fill={isLiked ? "currentColor" : "none"} />
+                        </button>
                     </div>
                 </section>
 
-                <section className="grid grid-cols-1 gap-6 mb-12">
-
-                    {userPlaylistSets[0]?.playlists?.map((playlist:any) => (
+                <section className="grid grid-cols-1 gap-6">
+                    {userPlaylistSets[0]?.playlists?.map((tome: any) => (
                         <TomeItem
-                            key={playlist.id}
-                            id={playlist.id}
-                            title={playlist.title}
-                            hymns={playlistLenght}
+                            key={tome.id}
+                            id={tome.id}
+                            title={tome.title}
+                            hymns={tome.songs?.length || 0}
                             duration={0}
                             icon={Castle}
-                            tracks={playlist.songs}
+                            tracks={tome.songs || []}
                             colorClass="border-[#ffb59c]"
-                            isExpanded={isExpanded[playlist.id]}
-                            openView={Expand}
+                            onPlayToggle={onPlayToggle}
+                            isPlayed={activeTomeId === tome.id}
                         />
                     ))}
                 </section>
-
-
             </main>
-
-
-
-
         </div>
     );
 }
