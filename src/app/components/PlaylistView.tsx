@@ -1,4 +1,4 @@
-import {useEffect, useState} from 'react';
+import {type ElementType, useEffect, useState} from 'react';
 import {useParams} from "react-router-dom";
 import {
     Castle,
@@ -6,21 +6,76 @@ import {
     ChevronDown,
     Play,
     LucideStar,
+    PauseIcon
 
 
 } from 'lucide-react';
 import {useCookies} from "react-cookie";
 
+interface Track {
+    id: number;
+    title: string;
+    url: string;
+}
+
+interface TomeItemProps {
+    id: number;
+    title: string;
+    hymns: number;
+    duration: number;
+    icon: ElementType;
+    colorClass: string;
+    tracks: Track[];
+    isExpanded: boolean;
+    openView: (id: number) => void;
+}
 
 
-const TomeItem = ({ id, title, hymns, duration, icon: Icon, colorClass, isLocked, tracks }) => {
-    const [isExpanded, setIsExpanded] = useState(id === 1);
+const TomeItem = ({ id, title, hymns, duration, icon: Icon, colorClass, tracks, isExpanded,openView }: TomeItemProps) => {
+
+
+    const[isTrackPlaying, setTrackPlaying] = useState(Array.from({ length:tracks.length }, () => false));
+
+
+
+    const changePLay = (id:number) =>
+    {
+        const newTracksState = [...isTrackPlaying];
+
+        newTracksState.map((track,index) => {
+            newTracksState[index] = false;
+        })
+        newTracksState[id] = !isTrackPlaying[id];
+
+        setTrackPlaying(newTracksState);
+
+    }
+
+    useEffect(()=>
+        {
+            if(!isExpanded){
+                const newTracksState = [...isTrackPlaying];
+
+                newTracksState.map((track,index) => {
+                    newTracksState[index] = false;
+                })
+
+                setTrackPlaying(newTracksState);
+
+
+            }
+        },[isExpanded]
+
+    )
+
+
+
 
     return (
-        <div className={`group bg-[#1c1b1b] transition-all duration-300 hover:bg-[#2a2a2a] border-l-0 ${!isLocked && 'hover:border-l-4'} ${colorClass} overflow-hidden ${isLocked ? 'opacity-80' : ''}`}>
+        <div className={`group bg-[#1c1b1b] transition-all duration-300 hover:bg-[#2a2a2a] border-l-0  ${colorClass} overflow-hidden `}>
             <div
                 className="p-8 flex flex-col md:flex-row md:items-center justify-between gap-6 cursor-pointer"
-                onClick={() => !isLocked && setIsExpanded(!isExpanded)}
+                onClick={() => openView(id)}
             >
                 <div className="flex items-center gap-6">
                     <div className={`w-16 h-16 bg-[#353534] flex items-center justify-center border-2 border-[#5b403d] group-hover:border-current transition-colors ${colorClass.replace('border-', 'text-')}`}>
@@ -33,15 +88,11 @@ const TomeItem = ({ id, title, hymns, duration, icon: Icon, colorClass, isLocked
                     </div>
                 </div>
                 <div className="flex items-center gap-6">
-                    {isLocked ? (
-                        <Lock size={28} className="text-[#c7c6c6]" />
-                    ) : (
                         <ChevronDown size={28} className={`text-[#c7c6c6] transition-transform duration-500 ${isExpanded ? 'rotate-180' : ''}`} />
-                    )}
                 </div>
             </div>
 
-            {isExpanded && !isLocked && (
+            {isExpanded &&  (
                 <div className="bg-[#0e0e0e] shadow-[inset_0_2px_4px_rgba(0,0,0,0.8)] border-t-2 border-[#5b403d]/20 p-8 space-y-4">
                     <div className="grid grid-cols-12 gap-4 font-sans text-[10px] uppercase tracking-widest text-[#ffb59c] mb-4 px-4">
                         <div className="col-span-1">#</div>
@@ -55,8 +106,13 @@ const TomeItem = ({ id, title, hymns, duration, icon: Icon, colorClass, isLocked
                             <div className="col-span-8 font-sans font-bold text-[#e5e2e1]">{track.title}</div>
                             <div className="col-span-2 text-right font-sans text-xs text-[#c7c6c6] tracking-widest">{track.time}</div>
                             <div className="col-span-1 text-right">
-                                <button className="text-[#ffb59c] hover:scale-110 transition-transform">
-                                    <Play size={18} fill="currentColor" />
+                                <button className="text-[#ffb59c] hover:scale-110 transition-transform" onClick={() => changePLay(idx)} >
+                                    {isTrackPlaying[idx] ?
+
+                                        (<PauseIcon size={18} fill="currentColor" />)
+                                        :(<Play size={18} fill="currentColor" />)
+
+                                    }
                                 </button>
                             </div>
                         </div>
@@ -76,7 +132,7 @@ export default function PlaylistSets() {
     const { id } = useParams();
     const playlistID = Number(id);
     const[userPlaylistSets, setUserPlaylistSets] = useState<any[]>([]);
-    const [playlistLenght,setPlaylistLenght] = useState();
+    const [playlistLenght,setPlaylistLenght] = useState(0);
 
 
     useEffect(() => {
@@ -211,6 +267,22 @@ export default function PlaylistSets() {
         }
 
     }
+    const [isExpanded, setExpanded] =  useState(Array.from({ length: playlistLenght }, () => false));
+
+    const Expand = (id: number) =>
+    {
+            const nexExpansion = [...isExpanded];
+
+            nexExpansion.map((track,index) => {
+                nexExpansion[index] = false;
+            })
+            nexExpansion[id] = !isExpanded[id];
+
+        setExpanded(nexExpansion);
+
+
+
+    }
 
     return (
         <div className="bg-[#131313] text-[#e5e2e1] min-h-screen pb-32 font-sans selection:bg-[#ffb59c]/30 selection:text-[#ffb59c] mt-20">
@@ -254,9 +326,10 @@ export default function PlaylistSets() {
                             hymns={playlistLenght}
                             duration={0}
                             icon={Castle}
-                            isLocked={false}
                             tracks={playlist.songs}
                             colorClass="border-[#ffb59c]"
+                            isExpanded={isExpanded[playlist.id]}
+                            openView={Expand}
                         />
                     ))}
                 </section>
