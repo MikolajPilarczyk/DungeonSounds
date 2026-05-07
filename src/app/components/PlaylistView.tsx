@@ -32,12 +32,18 @@ const TomeItem = ({ id, title, hymns, duration, icon: Icon, colorClass, tracks, 
     const [isTrackPlaying, setTrackPlaying] = useState<boolean[]>(() => tracks.map(() => false));
     const [isExpanded, setExpanded] = useState(id === 1);
 
-    const handleTrackClick = (idx: number) => {
+    const handlePlay = (idx: number) => {
         const newTracksState = isTrackPlaying.map((_, i) => i === idx ? !isTrackPlaying[idx] : false);
         setTrackPlaying(newTracksState);
         if (!isPlayed) {
             onPlayToggle(id);
         }
+
+
+        console.log(tracks[idx].title)
+
+
+
     };
 
     useEffect(() => {
@@ -80,7 +86,7 @@ const TomeItem = ({ id, title, hymns, duration, icon: Icon, colorClass, tracks, 
                             <div className="col-span-1 text-right">
                                 <button
                                     className="text-[#ffb59c] hover:scale-110 transition-transform"
-                                    onClick={(e) => { e.stopPropagation(); handleTrackClick(idx); }}
+                                    onClick={(e) => { e.stopPropagation(); handlePlay(idx); }}
                                 >
                                     {isTrackPlaying[idx] ? <PauseIcon size={18} /> : <PlayIcon size={18} />}
                                 </button>
@@ -101,6 +107,15 @@ export default function PlaylistSets() {
     const [cookies] = useCookies(['userData']);
     const [isLiked, setIsLiked] = useState(false);
 
+
+
+
+
+
+
+
+
+
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -120,6 +135,19 @@ export default function PlaylistSets() {
         if (playlistID) fetchData();
     }, [playlistID]);
 
+
+
+
+
+
+
+
+
+
+
+
+
+
     useEffect(() => {
         if (!cookies.userData?.userNameAndSurname || !playlistID) return;
         const checkLiked = async () => {
@@ -133,6 +161,19 @@ export default function PlaylistSets() {
         checkLiked();
     }, [playlistID, cookies.userData]);
 
+
+
+
+
+
+
+
+
+
+
+
+
+
     const handleLikeToggle = async () => {
         const prevStatus = isLiked;
         setIsLiked(!prevStatus);
@@ -144,9 +185,50 @@ export default function PlaylistSets() {
         });
     };
 
-    const onPlayToggle = (tomeId: number) => {
-        setActiveTomeId(prev => prev === tomeId ? null : tomeId);
+
+
+
+
+
+
+
+
+
+
+
+
+    const onPlayToggle = (playlistId: number) => {
+        setActiveTomeId(prev => prev === playlistId ? null : playlistId);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     };
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     return (
         <div className="bg-[#131313] text-[#e5e2e1] min-h-screen pb-32 mt-20">
@@ -167,18 +249,18 @@ export default function PlaylistSets() {
                 </section>
 
                 <section className="grid grid-cols-1 gap-6">
-                    {userPlaylistSets[0]?.playlists?.map((tome: any) => (
+                    {userPlaylistSets[0]?.playlists?.map((playlist: any) => (
                         <TomeItem
-                            key={tome.id}
-                            id={tome.id}
-                            title={tome.title}
-                            hymns={tome.songs?.length || 0}
+                            key={playlist.id}
+                            id={playlist.id}
+                            title={playlist.title}
+                            hymns={playlist.songs?.length || 0}
                             duration={0}
                             icon={Castle}
-                            tracks={tome.songs || []}
+                            tracks={playlist.songs || []}
                             colorClass="border-[#ffb59c]"
                             onPlayToggle={onPlayToggle}
-                            isPlayed={activeTomeId === tome.id}
+                            isPlayed={activeTomeId === playlist.id}
                         />
                     ))}
                 </section>
