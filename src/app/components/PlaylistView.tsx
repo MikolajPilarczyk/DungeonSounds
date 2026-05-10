@@ -20,7 +20,7 @@ interface TomeItemProps {
     id: number;
     title: string;
     hymns: number;
-    duration: number;
+    duration: string;
     icon: ElementType;
     colorClass: string;
     tracks: Track[];
@@ -28,9 +28,43 @@ interface TomeItemProps {
     isPlayed: boolean;
 }
 
+
+//const [isPlayed, setIsPlayed] = useState(false);
+
 const TomeItem = ({ id, title, hymns, duration, icon: Icon, colorClass, tracks, onPlayToggle, isPlayed }: TomeItemProps) => {
     const [isTrackPlaying, setTrackPlaying] = useState<boolean[]>(() => tracks.map(() => false));
     const [isExpanded, setExpanded] = useState(id === 1);
+
+    const [trackDuration, setTrackDuration] = useState(5);//w sekundach
+    const[progression, setProgression] = useState(1);// w sekundach
+
+    useEffect(() => {
+        let interval: ReturnType<typeof setInterval>;
+
+        const activeTrackIdx = isTrackPlaying.findIndex(playing => playing === true);
+
+        if (activeTrackIdx !== -1) {
+            interval = setInterval(() => {
+                setProgression((prev) => {
+                    if (prev >= trackDuration) return 0;
+                    return prev + 1;
+                });
+            }, 1000);
+        } else {
+            setProgression(0);
+            //const newTracksState = isTrackPlaying.map((_, i) => i === idx ? !isTrackPlaying[idx] : false);
+
+
+
+
+
+
+        }
+
+        return () => clearInterval(interval);
+    }, [isTrackPlaying]);
+
+
 
     const handlePlay = (idx: number) => {
         const newTracksState = isTrackPlaying.map((_, i) => i === idx ? !isTrackPlaying[idx] : false);
@@ -39,11 +73,19 @@ const TomeItem = ({ id, title, hymns, duration, icon: Icon, colorClass, tracks, 
             onPlayToggle(id);
         }
 
+        const playSong = async () => {
+            try {
+                await fetch('http://localhost:8080/api/playsong', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: tracks[idx].id, playing: !isTrackPlaying[idx] }),
+                });
+            } catch (error) {
+                console.error(error);
+            }
+        };
 
-        console.log(tracks[idx].title)
-
-
-
+        if (tracks) playSong();
     };
 
     useEffect(() => {
@@ -64,7 +106,7 @@ const TomeItem = ({ id, title, hymns, duration, icon: Icon, colorClass, tracks, 
                     </div>
                     <div>
                         <h2 className="font-serif text-3xl font-bold tracking-tight text-[#e5e2e1] uppercase">{title}</h2>
-                        <p className="font-sans text-xs uppercase tracking-widest text-[#c7c6c6] opacity-60">{hymns} HYMNS • {duration} MIN</p>
+                        <p className="font-sans text-xs uppercase tracking-widest text-[#c7c6c6] opacity-60">{hymns} PIOSENEK • {duration} MIN</p>
                     </div>
                 </div>
                 <ChevronDown size={28} className={`text-[#c7c6c6] transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} />
@@ -72,17 +114,35 @@ const TomeItem = ({ id, title, hymns, duration, icon: Icon, colorClass, tracks, 
 
             {isExpanded && (
                 <div className="bg-[#0e0e0e] border-t-2 border-[#5b403d]/20 p-8 space-y-4">
+                    {/* Header tabeli z nową kolumną na Progress */}
                     <div className="grid grid-cols-12 gap-4 font-sans text-[10px] uppercase tracking-widest text-[#ffb59c] mb-4 px-4">
                         <div className="col-span-1">#</div>
-                        <div className="col-span-8">INCANTATION</div>
-                        <div className="col-span-2 text-right">TIME</div>
-                        <div className="col-span-1 text-right">ACTION</div>
+                        <div className="col-span-3">TYTUŁ</div>
+                        <div className="col-span-5 text-center">CZAS TRWANIA</div>
+                        <div className="col-span-2 text-right">DŁUGOŚĆ</div>
+                        <div className="col-span-1 text-right">AKCJA</div>
                     </div>
+
                     {tracks.map((track, idx) => (
                         <div key={track.id || idx} className="grid grid-cols-12 gap-4 p-4 items-center hover:bg-[#ffb59c]/5 border-b border-[#5b403d]/10">
                             <div className="col-span-1 text-[#c7c6c6] opacity-40">{String(idx + 1).padStart(2, '0')}</div>
-                            <div className="col-span-8 font-bold text-[#e5e2e1]">{track.title}</div>
+
+                            <div className={`col-span-3 ${isTrackPlaying[idx] ? "font-bold text-[#ffb59c]" : "text-[#e5e2e1]"}`}>
+                                {track.title}
+                            </div>
+
+                            {/* ProgressBar imitujący postęp */}
+                            <div className="col-span-5 px-4">
+                                <div className="h-1 w-full bg-[#353534] rounded-full overflow-hidden">
+                                    <div
+                                        className={`h-full transition-all duration-1000 ${isTrackPlaying[idx] ? "bg-[#ffb59c]" : "bg-transparent"}`}
+                                        style={{ width: isTrackPlaying[idx] ? `${(progression / trackDuration) * 100}%` : '0%' }}
+                                    />
+                                </div>
+                            </div>
+
                             <div className="col-span-2 text-right text-xs text-[#c7c6c6]">{track.time || "3:00"}</div>
+
                             <div className="col-span-1 text-right">
                                 <button
                                     className="text-[#ffb59c] hover:scale-110 transition-transform"
@@ -255,7 +315,7 @@ export default function PlaylistSets() {
                             id={playlist.id}
                             title={playlist.title}
                             hymns={playlist.songs?.length || 0}
-                            duration={0}
+                            duration={"2:00"}
                             icon={Castle}
                             tracks={playlist.songs || []}
                             colorClass="border-[#ffb59c]"
