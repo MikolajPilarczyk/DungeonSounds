@@ -1,1 +1,1 @@
-## In building backend for dungeonsound web app for soundmanagment TTRPGS
+## In building web app for soundmanagment TTRPGS
