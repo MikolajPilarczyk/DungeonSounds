@@ -40,43 +40,57 @@ const TomeItem = ({ id, title, hymns, duration, icon: Icon, colorClass, tracks, 
     const [trackDuration, setTrackDuration] = useState(5);//w sekundach
     const[progression, setProgression] = useState(1);// w sekundach
 
+
+
+
+
     useEffect(() => {
         let interval: ReturnType<typeof setInterval>;
 
         const activeTrackIdx = isTrackPlaying.findIndex(playing => playing === true);
+        console.log("playing", tracks[activeTrackIdx]);
+        setProgression(0)
 
         if (activeTrackIdx !== -1) {
             interval = setInterval(() => {
+
                 setProgression((prev) => {
-                    if (prev >= trackDuration) return 0;
+
+
+                    if (prev >= trackDuration) {
+
+                        console.log("playing", tracks[activeTrackIdx]);
+                        setTrackPlaying((prevStates) => {
+
+                            const nextIndex = activeTrackIdx + 1;
+                            const newState = new Array(prevStates.length).fill(false);
+
+                            if (nextIndex < prevStates.length) {
+                                newState[nextIndex] = true;
+                            }
+
+                            return newState;
+                        });
+                        return 0;
+                    }
                     return prev + 1;
                 });
             }, 1000);
         } else {
             setProgression(0);
-            //const newTracksState = isTrackPlaying.map((_, i) => i === idx ? !isTrackPlaying[idx] : false);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         }
 
-        return () => clearInterval(interval);
-    }, [isTrackPlaying]);
 
+
+
+
+
+
+
+
+
+        return () => clearInterval(interval);
+    }, [isTrackPlaying, trackDuration]);
 
 
     const handlePlay = (idx: number) => {
