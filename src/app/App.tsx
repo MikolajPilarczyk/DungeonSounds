@@ -10,7 +10,7 @@ import {EditProfile} from "./EditProfile.tsx";
 import {PageNotFound} from "./page404.tsx";
 import {AddMaterial} from "./components/AddMaterial.tsx";
 import PlaylistSets from "./components/PlaylistView.tsx";
-
+import {DiscordAuthBack} from "./discordAuthBack.tsx";
 
 export default function App(){
     const [isLoggedIn,setIsLoggedIn] = useState(false);
@@ -26,6 +26,7 @@ export default function App(){
                       <Route path="/edycja-profilu" element={<EditProfile/> } />
                       <Route path="/dodaj-wpis" element={<AddMaterial/> } />
                       <Route path="/grymuar/:id" element={<PlaylistSets/> } />
+                      <Route path="/callback" element={<DiscordAuthBack/>}   />
                       <Route path="*" element={<PageNotFound/> } />
 
 

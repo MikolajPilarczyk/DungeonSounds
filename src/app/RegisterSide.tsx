@@ -149,6 +149,13 @@ export function RegisterSide()
                 >
                     Zarejestruj się jako {accountType === 'chochlik' ? 'Chochlik' : 'Bardodziej'}
                 </button>
+
+
+                <button>
+                    <a>
+                        <a href={"https://discord.com/oauth2/authorize?client_id=1497965024046747879&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A5173%2Fcallback&scope=guilds+identify+connections"}>Login By Discord</a>
+                    </a>
+                </button>
             </form>
         </div>
     );
