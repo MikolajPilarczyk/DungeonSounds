@@ -56,10 +56,10 @@ export function EditProfile()
 
                 if (response.ok) {
                     console.log("Zmieniono dane pomyślnie!");
-                    toast.success(message); // Zmieniono alert na toast dla spójności
+                    toast.success(message);
                     setCookie('userData', data.newUserName, {
                         path: '/',
-                        maxAge: 3600 // 1 godzina
+                        maxAge: 3600
                     });
                 }
             } catch (error) {
@@ -90,7 +90,7 @@ export function EditProfile()
 
             if (response.ok) {
                 console.log("Zmieniono dane pomyślnie!");
-                toast.success(message); // Zmieniono alert na toast
+                toast.success(message);
             }
 
         }
@@ -122,7 +122,7 @@ export function EditProfile()
         toast.info("Wizerunek profilowy został usunięty z kronik");
     };
 
-    // Poprawiono literówkę 'urzytkownika' na 'użytkownika' w renderowaniu
+
 
     if(cookies.userData?.isLogged)
     {
@@ -132,12 +132,12 @@ export function EditProfile()
             <div className="min-h-screen bg-[#1c1c1c] py-20 font-sans text-[#e0e0e0]">
                 <div className="max-w-4xl mx-auto px-6 py-12">
                     <div className="mb-10 border-b border-[#3a3a3a] pb-6">
-                        {/* Nagłówek: Kolor Primary (jasny róż) z palety */}
+
                         <h1 className="text-[2.5rem] mb-2 font-serif text-[#ffb59c] tracking-tight">Krypta Profilu</h1>
-                        {/* Podtytuł: Kolor Secondary (szary) z palety */}
+
                     </div>
 
-                    {/* Główny kontener: Nieco jaśniejszy szary z palety, subtelne obramowanie Secondary */}
+
                     <div className="bg-[#2a2a2a]  shadow-xl p-10 border border-[#3a3a3a]">
                         <form onSubmit={handleSubmitBio(onBioChangeSubmit)} className="space-y-10">
                             {/* Avatar Section */}
@@ -150,7 +150,7 @@ export function EditProfile()
                                         {avatarUrl ? (
                                             <img src={avatarUrl} alt="Avatar" className="size-full object-cover" />
                                         ) : (
-                                            // Ikona domyślna w kolorze Secondary
+
                                             <User className="size-12 text-[#8b8b8b]" />
                                         )}
                                     </div>
