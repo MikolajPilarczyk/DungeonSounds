@@ -25,7 +25,7 @@ export function AddMaterial() {
     const [tempTitle, setTempTitle] = useState<string>("");
 
     interface FormData {
-        username: string;
+        id: number;
         title: string;
         category: string;
         description: string;
@@ -33,7 +33,7 @@ export function AddMaterial() {
         playlists: Playlist[]
     }
     const [formData,setFormData] = useState<FormData>({
-        username: cookies.userData.userNameAndSurname,
+        id: cookies?.userData.id,
         title: "",
         category: "Karczma i Miasto",
         description: "",
