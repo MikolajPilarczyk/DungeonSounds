@@ -1,15 +1,8 @@
-import {useCookies} from "react-cookie";
 
 export function LoginSide()
 {
 
-    const userData =
-        {
-            userId: "",
-            userDiscordId: "",
-            isLogged: false
-        };
-    const [cookies, setCookie] = useCookies(['userData']);
+
 
 
 

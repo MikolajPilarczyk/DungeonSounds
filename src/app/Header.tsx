@@ -101,10 +101,11 @@ export function Header()
                         </div>
                         <IsLoggedIn />
                         <div className="w-10 h-10 border-2 border-primary bg-surface-container-high overflow-hidden">
-                            <Link to={`/profile/${encodeURIComponent(cookies?.userData?.userNameAndSurname || '')}`}>
+                            <Link to={`/profile/${encodeURIComponent(cookies?.userData?.username || '')}`}>
                                 <img alt="Dwarven hero avatar" className="w-full h-full object-cover grayscale contrast-125"
                                      data-alt="Dwarven warrior with braided beard and glowing copper eyes wearing heavy dark iron plate armor"
-                                     src="https://lh3.googleusercontent.com/aida-public/AB6AXuCRAm5-YVoLQV-_9fyCzCOHBtHxkchsPrKXlwOvqPylzQBt3GTsKD5Y6W3Lr-D1VFspOlWYnNQEMn0sPNvvjeQgzOdP8WnpIFoQ25k8Mid4NXdWlnet9wQGh7rC9saGfYlKm-Eguz9FIMZAXsDA-nj3g5-Tya05mGVOQD8hUD5WgtHuQoWgXBtMGKpXPDtJ_0UzeMkd90goCuGml4FdpXEkFU0pU7rEAIOZcDj6IdXNh8Mo7fuLQbBZMLL5nmu9NO4XLPluIxxKHYW7"/>
+                                     src={cookies?.userData?.avatarURL}
+                                />
                             </Link>
                         </div>
                     </>
