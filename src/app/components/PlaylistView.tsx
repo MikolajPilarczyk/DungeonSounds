@@ -234,19 +234,19 @@ export default function PlaylistSets() {
 
 
 
-
+// coś tu śmierdzi napraw to
     useEffect(() => {
-        if (!cookies.userData?.userNameAndSurname || !playlistID) return;
+        if (!cookies.userData?.id || !playlistID) return;
         const checkLiked = async () => {
             const resp = await fetch('http://localhost:8080/api/isLiked', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username: cookies.userData.userNameAndSurname, playlistId: playlistID }),
+                body: JSON.stringify({ id: cookies?.userData.id, playlistId: playlistID }),
             });
             if (resp.ok) setIsLiked(await resp.json());
         };
         checkLiked();
-    }, [playlistID, cookies.userData]);
+    }, [playlistID, cookies.userData.id]);
 
 
 
@@ -268,7 +268,7 @@ export default function PlaylistSets() {
         await fetch(`http://localhost:8080/api/${endpoint}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username: cookies.userData.userNameAndSurname, playlistId: playlistID }),
+            body: JSON.stringify({ id: cookies?.userData.id, playlistId: playlistID }),
         });
     };
 

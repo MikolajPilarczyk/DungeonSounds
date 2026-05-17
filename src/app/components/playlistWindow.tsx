@@ -2,7 +2,7 @@ import {ListMusic} from "lucide-react";
 
 
 interface PlaylistWindowProps {
-    title: string;  // poprawiłem literówkę z "tittle"
+    title: string;
     vibe: string;
     tracks: number;
 }
