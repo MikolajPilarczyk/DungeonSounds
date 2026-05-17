@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import {useCookies} from "react-cookie";
 import {BoltIcon } from "lucide-react";
+import {useEffect} from "react";
 
 
 
@@ -21,6 +22,50 @@ function IsLoggedIn()
         setCookie('userData',userData,{path: '/'})
     }
 
+
+    useEffect(() => {
+        if (!cookies.userData || !cookies.userData.id || cookies.userData.username) {
+            return;
+        }
+
+        const getUserNameById = async () => {
+            try {
+                const response = await fetch('http://localhost:8080/api/user/get-name', {
+                    method: 'POST',
+                    body: JSON.stringify(cookies.userData.id),
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Błąd serwera: ${response.status}`);
+                }
+
+                const fetchedUsername = await response.text();
+
+                console.log('New username:', fetchedUsername);
+
+                if (fetchedUsername) {
+                    const updatedUserData = {
+                        ...cookies.userData,
+                        username: fetchedUsername
+                    };
+
+                    setCookie('userData', JSON.stringify(updatedUserData), {
+                        path: '/',
+                        maxAge: 3600
+                    });
+                }
+
+            } catch (error) {
+                console.error('Wystąpił błąd podczas zdobywania aktualnej nazwy użytkownika:');
+            }
+        };
+
+        getUserNameById();
+
+// Zostawiamy w zależnościach cookies.userData, ale dzięki warunkowi na samej górze (if),
+// po zaktualizowaniu ciasteczka funkcja natychmiast się przerwie i nie wejdzie w nieskończoną pętlę!
+    }, [cookies.userData]);
 
     return(
 
@@ -101,6 +146,9 @@ export function Header()
                         </div>
                         <IsLoggedIn />
                         <div className="w-10 h-10 border-2 border-primary bg-surface-container-high overflow-hidden">
+
+
+
                             <Link to={`/profile/${encodeURIComponent(cookies?.userData?.username || '')}`}>
                                 <img alt="Dwarven hero avatar" className="w-full h-full object-cover grayscale contrast-125"
                                      data-alt="Dwarven warrior with braided beard and glowing copper eyes wearing heavy dark iron plate armor"
