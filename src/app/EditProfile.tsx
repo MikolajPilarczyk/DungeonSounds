@@ -22,6 +22,9 @@ export function EditProfile()
 
 
 
+
+
+
     const {
         register: registerBio,
         handleSubmit: handleSubmitBio
