@@ -8,6 +8,7 @@ import {
     PauseIcon
 } from 'lucide-react';
 import { useCookies } from "react-cookie";
+import type {Cookie} from "react-router";
 
 interface Track {
     id: number;
@@ -40,15 +41,68 @@ const TomeItem = ({ id, title, hymns, duration, icon: Icon, colorClass, tracks, 
     const [trackDuration, setTrackDuration] = useState(5);//w sekundach
     const[progression, setProgression] = useState(1);// w sekundach
 
+    const [cookies] = useCookies(['userData']);
+
+
 
 
 
 
     useEffect(() => {
+        const playSong = async () => {
+            try {
+                const response = await fetch('http://localhost:8080/api/playsong', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        trackId: tracks[activeTrackIdx].id,
+                        trackTitle: tracks[activeTrackIdx].title,
+                        trackUrl: tracks[activeTrackIdx].url,
+                        discordId: cookies?.userData?.discordId
+                    }),
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+
+                if (!response.ok) {
+                    throw new Error(`Błąd HTTP: ${response.status}`);
+                }
+
+
+
+            } catch (error) {
+                console.error('Wystąpił błąd podczas puszczania muzyki:', error);
+            }
+        };
+
+
+
+
+
+
+
+
         let interval: ReturnType<typeof setInterval>;
 
+
+
+
         const activeTrackIdx = isTrackPlaying.findIndex(playing => playing === true);
-        console.log("playing", tracks[activeTrackIdx]);
+
+
+
+
+        if(tracks[activeTrackIdx] && cookies?.userData.discordId)
+        {
+            console.log("playing", tracks[activeTrackIdx].title);
+            console.log("user dc id", cookies?.userData.discordId)
+            playSong();
+        }
+
+
+
+
+
+
         setProgression(0)
 
         if (activeTrackIdx !== -1) {
@@ -59,7 +113,6 @@ const TomeItem = ({ id, title, hymns, duration, icon: Icon, colorClass, tracks, 
 
                     if (prev >= trackDuration) {
 
-                        console.log("playing", tracks[activeTrackIdx]);
                         setTrackPlaying((prevStates) => {
 
                             const nextIndex = activeTrackIdx + 1;
