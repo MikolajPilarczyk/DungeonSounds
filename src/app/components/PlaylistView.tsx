@@ -44,7 +44,6 @@ const TomeItem = ({ id, title, hymns, duration, icon: Icon, colorClass, tracks, 
 
     useEffect(() => {
         const playSong = async (activeTrackIdx: number) => {
-            // Walidacja: jeśli nie wybrano gildii, przerywamy wysyłanie zapytania
             if (!selectedDiscord) {
                 console.warn("Nie można puścić utworu: Nie wybrano serwera Discord!");
                 return;
@@ -57,7 +56,7 @@ const TomeItem = ({ id, title, hymns, duration, icon: Icon, colorClass, tracks, 
                         trackId: tracks[activeTrackIdx].id,
                         trackTitle: tracks[activeTrackIdx].title,
                         trackUrl: tracks[activeTrackIdx].url,
-                        guildId: selectedDiscord // <-- Teraz ma poprawną wartość z propsów
+                        guildId: selectedDiscord
                     }),
                     headers: { 'Content-Type': 'application/json' }
                 });
@@ -103,7 +102,7 @@ const TomeItem = ({ id, title, hymns, duration, icon: Icon, colorClass, tracks, 
         }
 
         return () => clearInterval(interval);
-    }, [isTrackPlaying, trackDuration, selectedDiscord, tracks, cookies?.userData?.discordId]); // <-- Dodane zależności do tablicy
+    }, [isTrackPlaying, trackDuration, selectedDiscord, tracks, cookies?.userData?.discordId]);
 
     const handlePlay = (idx: number) => {
         const newTracksState = isTrackPlaying.map((_, i) => i === idx ? !isTrackPlaying[idx] : false);
@@ -201,7 +200,6 @@ export default function PlaylistSets() {
     const [isLiked, setIsLiked] = useState(false);
     const [discordServers, setDiscordServers] = useState<DiscordServer[]>([]);
 
-    // Przeniesione stany do wnętrza komponentu
     const [selectedDiscord, setSelectedDiscord] = useState("");
     const [selectedDiscordName, setSelectedDiscordName] = useState("");
 
@@ -242,7 +240,6 @@ export default function PlaylistSets() {
         checkLiked();
     }, [playlistID, cookies.userData?.id]);
 
-    // Zamknięto zapytanie o gildie w useEffect, aby uniknąć zapętlenia renderowania strony
     useEffect(() => {
         const getUserGuilds = async () => {
             try {
@@ -258,7 +255,6 @@ export default function PlaylistSets() {
                     const data = await response.json();
                     if (data) {
                         setDiscordServers(data);
-                        // Domyślny wybór pierwszego serwera, jeśli żaden nie jest wybrany
                         if (data.length > 0 && !selectedDiscord) {
                             setSelectedDiscord(data[0].serverId);
                             setSelectedDiscordName(data[0].serverName);
@@ -346,7 +342,7 @@ export default function PlaylistSets() {
                             colorClass="border-[#ffb59c]"
                             onPlayToggle={onPlayToggle}
                             isPlayed={activeTomeId === playlist.id}
-                            selectedDiscord={selectedDiscord} // <-- PRZEKAZANIE STANU DO KOMPONENTU
+                            selectedDiscord={selectedDiscord}
                         />
                     ))}
                 </section>
