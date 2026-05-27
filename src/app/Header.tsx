@@ -23,7 +23,7 @@ function IsLoggedIn()
     }
 
 
-    useEffect(() => {
+    /*useEffect(() => {
         if (!cookies.userData || !cookies.userData.id || cookies.userData.username) {
             return;
         }
@@ -65,7 +65,7 @@ function IsLoggedIn()
 
 // Zostawiamy w zależnościach cookies.userData, ale dzięki warunkowi na samej górze (if),
 // po zaktualizowaniu ciasteczka funkcja natychmiast się przerwie i nie wejdzie w nieskończoną pętlę!
-    }, [cookies.userData]);
+    }, [cookies.userData]);*/
 
     return(
 

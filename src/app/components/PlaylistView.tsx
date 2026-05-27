@@ -8,7 +8,6 @@ import {
     PauseIcon
 } from 'lucide-react';
 import { useCookies } from "react-cookie";
-import type {Cookie} from "react-router";
 
 interface Track {
     id: number;
@@ -27,36 +26,30 @@ interface TomeItemProps {
     tracks: Track[];
     onPlayToggle: (id: number) => void;
     isPlayed: boolean;
+    selectedDiscord: string; // <-- DODANE PROPS
 }
 
-interface DiscordServer
-{
+interface DiscordServer {
     serverId: string;
     serverName: string;
     serverIconUrl: string;
 }
 
-
-//const [isPlayed, setIsPlayed] = useState(false);
-
-const TomeItem = ({ id, title, hymns, duration, icon: Icon, colorClass, tracks, onPlayToggle, isPlayed }: TomeItemProps) => {
+const TomeItem = ({ id, title, hymns, duration, icon: Icon, colorClass, tracks, onPlayToggle, isPlayed, selectedDiscord }: TomeItemProps) => {
     const [isTrackPlaying, setTrackPlaying] = useState<boolean[]>(() => tracks.map(() => false));
     const [isExpanded, setExpanded] = useState(id === 1);
-
-
-
-    const [trackDuration, setTrackDuration] = useState(5);//w sekundach
-    const[progression, setProgression] = useState(1);// w sekundach
-
+    const [trackDuration, setTrackDuration] = useState(5);
+    const [progression, setProgression] = useState(1);
     const [cookies] = useCookies(['userData']);
 
-
-
-
-
-
     useEffect(() => {
-        const playSong = async () => {
+        const playSong = async (activeTrackIdx: number) => {
+            // Walidacja: jeśli nie wybrano gildii, przerywamy wysyłanie zapytania
+            if (!selectedDiscord) {
+                console.warn("Nie można puścić utworu: Nie wybrano serwera Discord!");
+                return;
+            }
+
             try {
                 const response = await fetch('http://localhost:8080/api/playsong', {
                     method: 'POST',
@@ -64,74 +57,40 @@ const TomeItem = ({ id, title, hymns, duration, icon: Icon, colorClass, tracks, 
                         trackId: tracks[activeTrackIdx].id,
                         trackTitle: tracks[activeTrackIdx].title,
                         trackUrl: tracks[activeTrackIdx].url,
-                        discordId: cookies?.userData?.discordId
+                        guildId: selectedDiscord // <-- Teraz ma poprawną wartość z propsów
                     }),
                     headers: { 'Content-Type': 'application/json' }
                 });
 
-
                 if (!response.ok) {
                     throw new Error(`Błąd HTTP: ${response.status}`);
                 }
-
-
-
             } catch (error) {
                 console.error('Wystąpił błąd podczas puszczania muzyki:', error);
             }
         };
 
-
-
-
-
-
-
-
-
-
         let interval: ReturnType<typeof setInterval>;
-
-
-
-
         const activeTrackIdx = isTrackPlaying.findIndex(playing => playing === true);
 
-
-
-
-        if(tracks[activeTrackIdx] && cookies?.userData.discordId)
-        {
+        if (activeTrackIdx !== -1 && tracks[activeTrackIdx] && cookies?.userData?.discordId) {
             console.log("playing", tracks[activeTrackIdx].title);
-            console.log("user dc id", cookies?.userData.discordId)
-            playSong();
+            console.log("user dc id", cookies?.userData.discordId);
+            playSong(activeTrackIdx);
         }
 
-
-
-
-
-
-
-        setProgression(0)
+        setProgression(0);
 
         if (activeTrackIdx !== -1) {
             interval = setInterval(() => {
-
                 setProgression((prev) => {
-
-
                     if (prev >= trackDuration) {
-
                         setTrackPlaying((prevStates) => {
-
                             const nextIndex = activeTrackIdx + 1;
                             const newState = new Array(prevStates.length).fill(false);
-
                             if (nextIndex < prevStates.length) {
                                 newState[nextIndex] = true;
                             }
-
                             return newState;
                         });
                         return 0;
@@ -143,18 +102,8 @@ const TomeItem = ({ id, title, hymns, duration, icon: Icon, colorClass, tracks, 
             setProgression(0);
         }
 
-
-
-
-
-
-
-
-
-
         return () => clearInterval(interval);
-    }, [isTrackPlaying, trackDuration]);
-
+    }, [isTrackPlaying, trackDuration, selectedDiscord, tracks, cookies?.userData?.discordId]); // <-- Dodane zależności do tablicy
 
     const handlePlay = (idx: number) => {
         const newTracksState = isTrackPlaying.map((_, i) => i === idx ? !isTrackPlaying[idx] : false);
@@ -163,7 +112,7 @@ const TomeItem = ({ id, title, hymns, duration, icon: Icon, colorClass, tracks, 
             onPlayToggle(id);
         }
 
-        const playSong = async () => {
+        const playSongClick = async () => {
             try {
                 await fetch('http://localhost:8080/api/playsong', {
                     method: 'POST',
@@ -175,7 +124,7 @@ const TomeItem = ({ id, title, hymns, duration, icon: Icon, colorClass, tracks, 
             }
         };
 
-        if (tracks) playSong();
+        if (tracks) playSongClick();
     };
 
     useEffect(() => {
@@ -204,7 +153,6 @@ const TomeItem = ({ id, title, hymns, duration, icon: Icon, colorClass, tracks, 
 
             {isExpanded && (
                 <div className="bg-[#0e0e0e] border-t-2 border-[#5b403d]/20 p-8 space-y-4">
-                    {/* Header tabeli z nową kolumną na Progress */}
                     <div className="grid grid-cols-12 gap-4 font-sans text-[10px] uppercase tracking-widest text-[#ffb59c] mb-4 px-4">
                         <div className="col-span-1">#</div>
                         <div className="col-span-3">TYTUŁ</div>
@@ -216,12 +164,9 @@ const TomeItem = ({ id, title, hymns, duration, icon: Icon, colorClass, tracks, 
                     {tracks.map((track, idx) => (
                         <div key={track.id || idx} className="grid grid-cols-12 gap-4 p-4 items-center hover:bg-[#ffb59c]/5 border-b border-[#5b403d]/10">
                             <div className="col-span-1 text-[#c7c6c6] opacity-40">{String(idx + 1).padStart(2, '0')}</div>
-
                             <div className={`col-span-3 ${isTrackPlaying[idx] ? "font-bold text-[#ffb59c]" : "text-[#e5e2e1]"}`}>
                                 {track.title}
                             </div>
-
-                            {/* ProgressBar imitujący postęp */}
                             <div className="col-span-5 px-4">
                                 <div className="h-1 w-full bg-[#353534] rounded-full overflow-hidden">
                                     <div
@@ -230,9 +175,7 @@ const TomeItem = ({ id, title, hymns, duration, icon: Icon, colorClass, tracks, 
                                     />
                                 </div>
                             </div>
-
                             <div className="col-span-2 text-right text-xs text-[#c7c6c6]">{track.time || "3:00"}</div>
-
                             <div className="col-span-1 text-right">
                                 <button
                                     className="text-[#ffb59c] hover:scale-110 transition-transform"
@@ -256,15 +199,16 @@ export default function PlaylistSets() {
     const [activeTomeId, setActiveTomeId] = useState<number | null>(null);
     const [cookies] = useCookies(['userData']);
     const [isLiked, setIsLiked] = useState(false);
+    const [discordServers, setDiscordServers] = useState<DiscordServer[]>([]);
 
+    // Przeniesione stany do wnętrza komponentu
+    const [selectedDiscord, setSelectedDiscord] = useState("");
+    const [selectedDiscordName, setSelectedDiscordName] = useState("");
 
-
-
-
-
-
-
-
+    const handleData = (id: string, name: string) => {
+        setSelectedDiscord(id);
+        setSelectedDiscordName(name);
+    };
 
     useEffect(() => {
         const fetchData = async () => {
@@ -285,19 +229,6 @@ export default function PlaylistSets() {
         if (playlistID) fetchData();
     }, [playlistID]);
 
-
-
-
-
-
-
-
-
-
-
-
-
-// coś tu śmierdzi napraw to
     useEffect(() => {
         if (!cookies.userData?.id || !playlistID) return;
         const checkLiked = async () => {
@@ -309,20 +240,40 @@ export default function PlaylistSets() {
             if (resp.ok) setIsLiked(await resp.json());
         };
         checkLiked();
-    }, [playlistID, cookies.userData.id]);
+    }, [playlistID, cookies.userData?.id]);
 
+    // Zamknięto zapytanie o gildie w useEffect, aby uniknąć zapętlenia renderowania strony
+    useEffect(() => {
+        const getUserGuilds = async () => {
+            try {
+                const response = await fetch('http://localhost:8080/api/get/user/guilds', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        userId: cookies?.userData?.id
+                    }),
+                    headers: { 'Content-Type': 'application/json' }
+                });
 
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data) {
+                        setDiscordServers(data);
+                        // Domyślny wybór pierwszego serwera, jeśli żaden nie jest wybrany
+                        if (data.length > 0 && !selectedDiscord) {
+                            setSelectedDiscord(data[0].serverId);
+                            setSelectedDiscordName(data[0].serverName);
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Wystąpił błąd podczas pobierania gildii:', error);
+            }
+        };
 
-
-
-
-
-
-
-
-
-
-
+        if (cookies?.userData?.discordId) {
+            getUserGuilds();
+        }
+    }, [cookies?.userData?.discordId, cookies?.userData?.id]);
 
     const handleLikeToggle = async () => {
         const prevStatus = isLiked;
@@ -335,131 +286,40 @@ export default function PlaylistSets() {
         });
     };
 
-
-
-
-
-
-
-
-
-
-
-
-
     const onPlayToggle = (playlistId: number) => {
         setActiveTomeId(prev => prev === playlistId ? null : playlistId);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     };
 
-
-
-
-
-
-
-
-
-    const [discordServers,setDiscordServers] = useState<DiscordServer[]>([]);
-
-    const getUserGuilds = async () => {
-        try {
-            const response = await fetch('http://localhost:8080/api/get/user/guilds', {
-                method: 'POST',
-                body: JSON.stringify({
-                    userId: cookies?.userData?.id
-                }),
-                headers: { 'Content-Type': 'application/json' }
-            });
-
-
-            if (response.ok)
-            {
-                const data = await response.json();
-                if(data)
-                {
-                    setDiscordServers(data)
-                    console.log(data)
-
-                }
-            }
-            else{
-                throw new Error(`Błąd HTTP: ${response.status}`);
-            }
-
-
-
-        } catch (error) {
-            console.error('Wystąpił błąd podczas puszczania muzyki:', error);
-        }
-    };
-
-    const [selectedDiscord,setSelectedDiscord] = useState("")
-    const [selectedDiscordName,setSelectedDiscordName] = useState("")
-
-    const handleData = (id:string,name:string) =>
-    {
-        setSelectedDiscord(id);
-        setSelectedDiscordName(name);
-    }
-
-    if(cookies?.userData.discordId)
-    {
-        getUserGuilds();
-    }
-
-    // dodaj polubianie discordów i wyboru do przesłania do backendu
     return (
         <div className="bg-[#131313] text-[#e5e2e1] min-h-screen pb-32 mt-20 flex flex-col md:flex-row">
-            {/* Boczny pasek z serwerami Discord */}
             <aside className="flex flex-row md:flex-col items-center p-4 bg-[#0f0f0f] md:min-h-screen border-b md:border-b-0 md:border-r border-zinc-800 self-start sticky top-20 z-10 w-full md:w-auto overflow-x-auto md:overflow-x-visible">
                 {discordServers?.map((discordServer: DiscordServer, index: number) => (
                     <div className="m-2 p-1 shrink-0" key={index}>
-                        {
-
-                            (discordServer.serverId ==selectedDiscord) ?(
-
-                                    <img
-                                        src={discordServer.serverIconUrl}
-                                        className="w-22 h-22 rounded-full border-emerald-500 border-2 hover:scale-115 transition-all duration-150 cursor-pointer"
-                                        alt={discordServer.serverName}
-                                        onClick={() => handleData(discordServer.serverId,discordServer.serverName)}
-                                    />
-                            ):
-                                (
-                                <img
-                                    src={discordServer.serverIconUrl}
-                                    className="w-20 h-20 rounded-full hover:border-emerald-700 border-2 hover:scale-115 transition-all duration-150 cursor-pointer"
-                                    alt={discordServer.serverName}
-                                    onClick={() => handleData(discordServer.serverId,discordServer.serverName)}
-                                />
-                                )
-                        }
-
+                        {discordServer.serverId === selectedDiscord ? (
+                            <img
+                                src={discordServer.serverIconUrl}
+                                className="w-22 h-22 rounded-full border-emerald-500 border-2 hover:scale-115 transition-all duration-150 cursor-pointer"
+                                alt={discordServer.serverName}
+                                onClick={() => handleData(discordServer.serverId, discordServer.serverName)}
+                            />
+                        ) : (
+                            <img
+                                src={discordServer.serverIconUrl}
+                                className="w-20 h-20 rounded-full hover:border-emerald-700 border-2 hover:scale-115 transition-all duration-150 cursor-pointer"
+                                alt={discordServer.serverName}
+                                onClick={() => handleData(discordServer.serverId, discordServer.serverName)}
+                            />
+                        )}
                     </div>
                 ))}
             </aside>
 
-            {/* Główna zawartość strony */}
             <main className="flex-1 max-w-7xl mx-auto px-6 pt-12 w-full">
                 <section className="mb-16 grid grid-cols-1 lg:grid-cols-2 gap-12 items-end">
                     <div>
-                        <h2>{selectedDiscord},{selectedDiscordName}</h2>
+                        <h2 className="text-emerald-500 text-sm font-mono mb-2">
+                            {selectedDiscord ? `Wybrany serwer: ${selectedDiscordName}` : "⚠️ Wybierz serwer Discord z listy po lewej"}
+                        </h2>
                         <h1 className="text-6xl lg:text-8xl font-black mb-4 font-serif">{userPlaylistSets[0]?.title}</h1>
                         <p className="text-xl text-[#c7c6c6]">{userPlaylistSets[0]?.description}</p>
                     </div>
@@ -486,6 +346,7 @@ export default function PlaylistSets() {
                             colorClass="border-[#ffb59c]"
                             onPlayToggle={onPlayToggle}
                             isPlayed={activeTomeId === playlist.id}
+                            selectedDiscord={selectedDiscord} // <-- PRZEKAZANIE STANU DO KOMPONENTU
                         />
                     ))}
                 </section>
