@@ -29,7 +29,12 @@ interface TomeItemProps {
     isPlayed: boolean;
 }
 
-
+interface DiscordServer
+{
+    serverId: string;
+    serverName: string;
+    serverIconUrl: string;
+}
 
 
 //const [isPlayed, setIsPlayed] = useState(false);
@@ -37,6 +42,8 @@ interface TomeItemProps {
 const TomeItem = ({ id, title, hymns, duration, icon: Icon, colorClass, tracks, onPlayToggle, isPlayed }: TomeItemProps) => {
     const [isTrackPlaying, setTrackPlaying] = useState<boolean[]>(() => tracks.map(() => false));
     const [isExpanded, setExpanded] = useState(id === 1);
+
+
 
     const [trackDuration, setTrackDuration] = useState(5);//w sekundach
     const[progression, setProgression] = useState(1);// w sekundach
@@ -81,6 +88,8 @@ const TomeItem = ({ id, title, hymns, duration, icon: Icon, colorClass, tracks, 
 
 
 
+
+
         let interval: ReturnType<typeof setInterval>;
 
 
@@ -97,6 +106,7 @@ const TomeItem = ({ id, title, hymns, duration, icon: Icon, colorClass, tracks, 
             console.log("user dc id", cookies?.userData.discordId)
             playSong();
         }
+
 
 
 
@@ -365,16 +375,91 @@ export default function PlaylistSets() {
 
 
 
+    const [discordServers,setDiscordServers] = useState<DiscordServer[]>([]);
+
+    const getUserGuilds = async () => {
+        try {
+            const response = await fetch('http://localhost:8080/api/get/user/guilds', {
+                method: 'POST',
+                body: JSON.stringify({
+                    userId: cookies?.userData?.id
+                }),
+                headers: { 'Content-Type': 'application/json' }
+            });
+
+
+            if (response.ok)
+            {
+                const data = await response.json();
+                if(data)
+                {
+                    setDiscordServers(data)
+                    console.log(data)
+
+                }
+            }
+            else{
+                throw new Error(`Błąd HTTP: ${response.status}`);
+            }
 
 
 
+        } catch (error) {
+            console.error('Wystąpił błąd podczas puszczania muzyki:', error);
+        }
+    };
 
+    const [selectedDiscord,setSelectedDiscord] = useState("")
+    const [selectedDiscordName,setSelectedDiscordName] = useState("")
 
+    const handleData = (id:string,name:string) =>
+    {
+        setSelectedDiscord(id);
+        setSelectedDiscordName(name);
+    }
+
+    if(cookies?.userData.discordId)
+    {
+        getUserGuilds();
+    }
+
+    // dodaj polubianie discordów i wyboru do przesłania do backendu
     return (
-        <div className="bg-[#131313] text-[#e5e2e1] min-h-screen pb-32 mt-20">
-            <main className="max-w-7xl mx-auto px-6 pt-12">
+        <div className="bg-[#131313] text-[#e5e2e1] min-h-screen pb-32 mt-20 flex flex-col md:flex-row">
+            {/* Boczny pasek z serwerami Discord */}
+            <aside className="flex flex-row md:flex-col items-center p-4 bg-[#0f0f0f] md:min-h-screen border-b md:border-b-0 md:border-r border-zinc-800 self-start sticky top-20 z-10 w-full md:w-auto overflow-x-auto md:overflow-x-visible">
+                {discordServers?.map((discordServer: DiscordServer, index: number) => (
+                    <div className="m-2 p-1 shrink-0" key={index}>
+                        {
+
+                            (discordServer.serverId ==selectedDiscord) ?(
+
+                                    <img
+                                        src={discordServer.serverIconUrl}
+                                        className="w-22 h-22 rounded-full border-emerald-500 border-2 hover:scale-115 transition-all duration-150 cursor-pointer"
+                                        alt={discordServer.serverName}
+                                        onClick={() => handleData(discordServer.serverId,discordServer.serverName)}
+                                    />
+                            ):
+                                (
+                                <img
+                                    src={discordServer.serverIconUrl}
+                                    className="w-20 h-20 rounded-full hover:border-emerald-700 border-2 hover:scale-115 transition-all duration-150 cursor-pointer"
+                                    alt={discordServer.serverName}
+                                    onClick={() => handleData(discordServer.serverId,discordServer.serverName)}
+                                />
+                                )
+                        }
+
+                    </div>
+                ))}
+            </aside>
+
+            {/* Główna zawartość strony */}
+            <main className="flex-1 max-w-7xl mx-auto px-6 pt-12 w-full">
                 <section className="mb-16 grid grid-cols-1 lg:grid-cols-2 gap-12 items-end">
                     <div>
+                        <h2>{selectedDiscord},{selectedDiscordName}</h2>
                         <h1 className="text-6xl lg:text-8xl font-black mb-4 font-serif">{userPlaylistSets[0]?.title}</h1>
                         <p className="text-xl text-[#c7c6c6]">{userPlaylistSets[0]?.description}</p>
                     </div>
