@@ -26,7 +26,7 @@ interface TomeItemProps {
     tracks: Track[];
     onPlayToggle: (id: number) => void;
     isPlayed: boolean;
-    selectedDiscord: string; // <-- DODANE PROPS
+    selectedDiscord: string;
 }
 
 interface DiscordServer {
@@ -38,14 +38,21 @@ interface DiscordServer {
 const TomeItem = ({ id, title, hymns, duration, icon: Icon, colorClass, tracks, onPlayToggle, isPlayed, selectedDiscord }: TomeItemProps) => {
     const [isTrackPlaying, setTrackPlaying] = useState<boolean[]>(() => tracks.map(() => false));
     const [isExpanded, setExpanded] = useState(id === 1);
-    const [trackDuration, setTrackDuration] = useState(5);
-    const [progression, setProgression] = useState(1);
+    const [trackDuration] = useState(15);
+    const [progression, setProgression] = useState(0);
     const [cookies] = useCookies(['userData']);
 
     useEffect(() => {
         const playSong = async (activeTrackIdx: number) => {
             if (!selectedDiscord) {
                 console.warn("Nie można puścić utworu: Nie wybrano serwera Discord!");
+                return;
+            }
+
+            const discordUserId = cookies?.userData?.discordId || cookies?.userData?.userId || cookies?.userData?.id;
+
+            if (!discordUserId) {
+                console.error("Błąd: Nie znaleziono ID użytkownika w cookies.userData!");
                 return;
             }
 
@@ -56,7 +63,8 @@ const TomeItem = ({ id, title, hymns, duration, icon: Icon, colorClass, tracks, 
                         trackId: tracks[activeTrackIdx].id,
                         trackTitle: tracks[activeTrackIdx].title,
                         trackUrl: tracks[activeTrackIdx].url,
-                        guildId: selectedDiscord
+                        guildId: selectedDiscord,
+                        userId: String(discordUserId)
                     }),
                     headers: { 'Content-Type': 'application/json' }
                 });
@@ -72,9 +80,7 @@ const TomeItem = ({ id, title, hymns, duration, icon: Icon, colorClass, tracks, 
         let interval: ReturnType<typeof setInterval>;
         const activeTrackIdx = isTrackPlaying.findIndex(playing => playing === true);
 
-        if (activeTrackIdx !== -1 && tracks[activeTrackIdx] && cookies?.userData?.discordId) {
-            console.log("playing", tracks[activeTrackIdx].title);
-            console.log("user dc id", cookies?.userData.discordId);
+        if (activeTrackIdx !== -1 && tracks[activeTrackIdx] && (cookies?.userData?.discordId || cookies?.userData?.id)) {
             playSong(activeTrackIdx);
         }
 
@@ -102,28 +108,57 @@ const TomeItem = ({ id, title, hymns, duration, icon: Icon, colorClass, tracks, 
         }
 
         return () => clearInterval(interval);
-    }, [isTrackPlaying, trackDuration, selectedDiscord, tracks, cookies?.userData?.discordId]);
+    }, [isTrackPlaying, trackDuration, selectedDiscord, tracks, cookies?.userData]);
+
+    const handlePauseToggle = async (guildId: string, currentPlayState: boolean) => {
+        if (!guildId) return;
+
+        // Jeśli utwór grał, wysyłamy żądanie na endpoint pauzy, w przeciwnym wypadku na resume
+        const endpoint = currentPlayState ? 'pause' : 'resume';
+
+        try {
+            const response = await fetch(`http://localhost:8080/api/${endpoint}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ guildId: guildId })
+            });
+
+            if (!response.ok) {
+                throw new Error(`Nie udało się zmienić stanu odtwarzania (${endpoint})`);
+            }
+        } catch (error) {
+            console.error('Błąd kontroli odtwarzania:', error);
+        }
+    };
 
     const handlePlay = (idx: number) => {
-        const newTracksState = isTrackPlaying.map((_, i) => i === idx ? !isTrackPlaying[idx] : false);
-        setTrackPlaying(newTracksState);
+        const isCurrentTrackPlaying = isTrackPlaying[idx];
+
+        if (isCurrentTrackPlaying) {
+            // Jeśli kliknięto na aktualnie grający utwór -> pauzujemy go
+            handlePauseToggle(selectedDiscord, true);
+            const newTracksState = [...isTrackPlaying];
+            newTracksState[idx] = false;
+            setTrackPlaying(newTracksState);
+        } else {
+            // Jeśli utwór był zapauzowany przez kogoś innego lub włączamy nowy utwór
+            const anyTrackPlaying = isTrackPlaying.some(p => p === true);
+
+            if (anyTrackPlaying) {
+                // Jeśli przełączamy się bezpośrednio na zupełnie inny utwór w obrębie listy
+                const newTracksState = isTrackPlaying.map((_, i) => i === idx);
+                setTrackPlaying(newTracksState);
+            } else {
+                // Jeśli wznawiamy utwór (lub odpalamy pierwszy raz)
+                handlePauseToggle(selectedDiscord, false);
+                const newTracksState = isTrackPlaying.map((_, i) => i === idx);
+                setTrackPlaying(newTracksState);
+            }
+        }
+
         if (!isPlayed) {
             onPlayToggle(id);
         }
-
-        const playSongClick = async () => {
-            try {
-                await fetch('http://localhost:8080/api/playsong', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ id: tracks[idx].id, playing: !isTrackPlaying[idx] }),
-                });
-            } catch (error) {
-                console.error(error);
-            }
-        };
-
-        if (tracks) playSongClick();
     };
 
     useEffect(() => {
@@ -176,6 +211,7 @@ const TomeItem = ({ id, title, hymns, duration, icon: Icon, colorClass, tracks, 
                             </div>
                             <div className="col-span-2 text-right text-xs text-[#c7c6c6]">{track.time || "3:00"}</div>
                             <div className="col-span-1 text-right">
+                                {/* POPRAWKA: Przeniesienie onClick na kontener button gwarantuje poprawne przechwycenie akcji dla obu ikon */}
                                 <button
                                     className="text-[#ffb59c] hover:scale-110 transition-transform"
                                     onClick={(e) => { e.stopPropagation(); handlePlay(idx); }}
@@ -266,10 +302,10 @@ export default function PlaylistSets() {
             }
         };
 
-        if (cookies?.userData?.discordId) {
+        if (cookies?.userData?.discordId || cookies?.userData?.id) {
             getUserGuilds();
         }
-    }, [cookies?.userData?.discordId, cookies?.userData?.id]);
+    }, [cookies?.userData, selectedDiscord]);
 
     const handleLikeToggle = async () => {
         const prevStatus = isLiked;
