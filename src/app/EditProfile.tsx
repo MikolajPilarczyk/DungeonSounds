@@ -1,18 +1,13 @@
 import {type SubmitHandler, useForm} from "react-hook-form";
 import {useCookies} from "react-cookie";
 import {toast} from "sonner";
-import {useRef, useState} from "react";
-import { Upload, Trash2, User } from "lucide-react"; // Dodano User dla lepszej ikony
+import { User } from "lucide-react"; // Dodano User dla lepszej ikony
 
 export function EditProfile()
 {
 
-    const[cookies,setCookie] = useCookies(['userData']);
-    interface UsernameForm
-    {
-        username: string;
-        newUserName: string;
-    };
+    const[cookies] = useCookies(['userData']);
+
     interface BioFormData
     {
 
