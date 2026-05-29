@@ -88,9 +88,8 @@
       "optional": true
     }
   },
-  "pnpm": {
-    "overrides": {
-      "vite": "6.3.5"
-    }
+  "overrides": {
+    "vite": "6.3.5",
+    "classNames": "npm:classnames@^2.5.1"
   }
 }
