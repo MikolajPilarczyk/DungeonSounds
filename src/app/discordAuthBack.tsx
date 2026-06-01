@@ -16,6 +16,8 @@ export function DiscordAuthBack() {
 
 
 
+
+
     useEffect(() => {
         const handleDiscordAuth = async () => {
             const urlParams = new URLSearchParams(window.location.search);
