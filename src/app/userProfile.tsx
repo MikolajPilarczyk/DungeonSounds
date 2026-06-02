@@ -1,7 +1,6 @@
 import {useEffect, useState} from "react";
 import {Link, useParams} from "react-router-dom";
 import {PlaylistWindow} from "./components/playlistWindow.tsx";
-import {useCookies} from "react-cookie";
 
 
 export function UserProfile() {
@@ -12,7 +11,6 @@ export function UserProfile() {
     const UsernameToSend= {
         usernameToFind: username
     }
-    const [cookies] = useCookies(['userData']);
 
     const [numberOfUsers, setNumberOfUsers] = useState<number>(0);
     const [userProfile, setUserProfile] = useState({
@@ -22,7 +20,8 @@ export function UserProfile() {
         totalLikes: 0,
         totalMaterials: 0,
         premiumMaterials: 0,
-        accountType:""
+        accountType:"",
+        url: ""
     });
 
     useEffect(() => {
@@ -58,13 +57,13 @@ export function UserProfile() {
 
                 if (response.ok) {
                     const result = await response.json();
-                    console.log("Serwer odpowiedział:", result);
                     setUserProfile(prevState => ({
                         ...prevState,
                         bio: result.bio || "Brak bio",
-                        totalLikes: result.likes ,
-                        totalMaterials: result.materials ,
-                        accountType: result.accountType
+                        totalLikes: result.likes ?? 0,
+                        totalMaterials: result.materials ?? 0,
+                        accountType: result.accountType || "",
+                        url: result.url || "https://cdn.discordapp.com/embed/avatars/0.png"
                     }));
                 }
             } catch (error) {
@@ -171,12 +170,12 @@ export function UserProfile() {
                                                 className="w-full h-full rounded-full overflow-hidden bg-[#353534]">
                                                 <img alt="Character avatar" className="w-full h-full object-cover"
                                                      data-alt="Intense close up portrait of an elderly dwarven master bard with braided gray beard and ornate copper jewelry"
-                                                     src={cookies?.userData?.avatarURL}
+                                                     src={userProfile.url}
 
                                                 />
                                             </div>
                                         </div>
-                                        <h1 className="font-headline text-3xl font-bold tracking-tight text-[#ffb59c] uppercase text-center leading-tight mb-2">{cookies?.userData?.global_name}</h1>
+                                        <h1 className="font-headline text-3xl font-bold tracking-tight text-[#ffb59c] uppercase text-center leading-tight mb-2">{username}</h1>
                                         <p className="font-label text-[10px] tracking-[0.2em] text-[#c7c6c6] uppercase mb-6 font-bold">{userProfile?.accountType}</p>
                                         <div className="w-full space-y-4 mb-8">
                                             <p className="text-[#e4beb9] text-sm text-center italic leading-relaxed">
