@@ -38,23 +38,29 @@ interface DiscordServer {
 const TomeItem = ({ id, title, hymns, duration, icon: Icon, colorClass, tracks, onPlayToggle, isPlayed, selectedDiscord }: TomeItemProps) => {
     const [isTrackPlaying, setTrackPlaying] = useState<boolean[]>(() => tracks.map(() => false));
     const [isExpanded, setExpanded] = useState(id === 1);
-    const [trackDuration] = useState(15);
+    const [trackDuration, setTrackDuration] = useState(0);
+    const [trackTitle, setTrackTitle] = useState("");
     const [progression, setProgression] = useState(0);
+    const [trackDurations, setTrackDurations] = useState<Record<number, number>>({}); // długość per utwór
     const [cookies] = useCookies(['userData']);
+
+
+
+    const [isPaused, setIsPaused] = useState(false);
+
+    // Formatuje ms -> "4:03"
+    const formatMs = (ms: number): string => {
+        if (!ms || ms <= 0) return "--:--";
+        const minutes = Math.floor(ms / 60000);
+        const seconds = Math.floor((ms % 60000) / 1000);
+        return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    };
 
     useEffect(() => {
         const playSong = async (activeTrackIdx: number) => {
-            if (!selectedDiscord) {
-                console.warn("Nie można puścić utworu: Nie wybrano serwera Discord!");
-                return;
-            }
-
+            if (!selectedDiscord) return;
             const discordUserId = cookies?.userData?.discordId || cookies?.userData?.userId || cookies?.userData?.id;
-
-            if (!discordUserId) {
-                console.error("Błąd: Nie znaleziono ID użytkownika w cookies.userData!");
-                return;
-            }
+            if (!discordUserId) return;
 
             try {
                 const response = await fetch('http://localhost:8080/api/playsong', {
@@ -69,62 +75,67 @@ const TomeItem = ({ id, title, hymns, duration, icon: Icon, colorClass, tracks, 
                     headers: { 'Content-Type': 'application/json' }
                 });
 
-                if (!response.ok) {
-                    throw new Error(`Błąd HTTP: ${response.status}`);
-                }
+                if (!response.ok) throw new Error(`Błąd HTTP: ${response.status}`);
+
+                const data = await response.json();
+                const ms = parseInt(data.durationMs);
+
+                // Zapisz długość dla konkretnego tracka
+                setTrackDurations(prev => ({ ...prev, [activeTrackIdx]: ms }));
+                setTrackDuration(ms);
+                setTrackTitle(data.title);
+                setProgression(0); // reset paska po załadowaniu
+
             } catch (error) {
-                console.error('Wystąpił błąd podczas puszczania muzyki:', error);
+                console.error('Błąd podczas puszczania muzyki:', error);
             }
         };
 
-        let interval: ReturnType<typeof setInterval>;
-        const activeTrackIdx = isTrackPlaying.findIndex(playing => playing === true);
+        const activeTrackIdx = isTrackPlaying.findIndex(p => p === true);
 
-        if (activeTrackIdx !== -1 && tracks[activeTrackIdx] && (cookies?.userData?.discordId || cookies?.userData?.id)) {
+        if (activeTrackIdx !== -1 && tracks[activeTrackIdx]) {
             playSong(activeTrackIdx);
-        }
-
-        setProgression(0);
-
-        if (activeTrackIdx !== -1) {
-            interval = setInterval(() => {
-                setProgression((prev) => {
-                    if (prev >= trackDuration) {
-                        setTrackPlaying((prevStates) => {
-                            const nextIndex = activeTrackIdx + 1;
-                            const newState = new Array(prevStates.length).fill(false);
-                            if (nextIndex < prevStates.length) {
-                                newState[nextIndex] = true;
-                            }
-                            return newState;
-                        });
-                        return 0;
-                    }
-                    return prev + 1;
-                });
-            }, 1000);
         } else {
             setProgression(0);
         }
+    }, [isTrackPlaying]); // odpala tylko gdy zmieni się grający utwór
+
+    // Osobny useEffect dla interwału - reaguje na trackDuration
+    useEffect(() => {
+        const activeTrackIdx = isTrackPlaying.findIndex(p => p === true);
+        if (activeTrackIdx === -1 || trackDuration <= 0) return;
+
+        const interval = setInterval(() => {
+            setProgression(prev => {
+                const next = prev + 1000; // +1000ms co sekundę
+                if (next >= trackDuration) {
+                    // Przejdź do następnego utworu
+                    setTrackPlaying(prevStates => {
+                        const newState = new Array(prevStates.length).fill(false);
+                        const nextIndex = activeTrackIdx + 1;
+                        if (nextIndex < prevStates.length) newState[nextIndex] = true;
+                        return newState;
+                    });
+                    return 0;
+                }
+                return next;
+            });
+        }, 1000);
 
         return () => clearInterval(interval);
-    }, [isTrackPlaying, trackDuration, selectedDiscord, tracks, cookies?.userData]);
+    }, [trackDuration, isTrackPlaying]);
 
-    const handlePauseToggle = async (guildId: string, currentPlayState: boolean) => {
+    const sendPauseRequest = async (guildId: string, pause: boolean) => {
         if (!guildId) return;
-
-        // Jeśli utwór grał, wysyłamy żądanie na endpoint pauzy, w przeciwnym wypadku na resume
-        const endpoint = currentPlayState ? 'pause' : 'resume';
-
+        const endpoint = pause ? 'pause' : 'resume';
         try {
             const response = await fetch(`http://localhost:8080/api/${endpoint}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ guildId: guildId })
+                body: JSON.stringify({ guildId })
             });
-
-            if (!response.ok) {
-                throw new Error(`Nie udało się zmienić stanu odtwarzania (${endpoint})`);
+            if (response.ok) {
+                setIsPaused(pause);
             }
         } catch (error) {
             console.error('Błąd kontroli odtwarzania:', error);
@@ -135,37 +146,29 @@ const TomeItem = ({ id, title, hymns, duration, icon: Icon, colorClass, tracks, 
         const isCurrentTrackPlaying = isTrackPlaying[idx];
 
         if (isCurrentTrackPlaying) {
-            // Jeśli kliknięto na aktualnie grający utwór -> pauzujemy go
-            handlePauseToggle(selectedDiscord, true);
-            const newTracksState = [...isTrackPlaying];
-            newTracksState[idx] = false;
-            setTrackPlaying(newTracksState);
-        } else {
-            // Jeśli utwór był zapauzowany przez kogoś innego lub włączamy nowy utwór
-            const anyTrackPlaying = isTrackPlaying.some(p => p === true);
-
-            if (anyTrackPlaying) {
-                // Jeśli przełączamy się bezpośrednio na zupełnie inny utwór w obrębie listy
-                const newTracksState = isTrackPlaying.map((_, i) => i === idx);
-                setTrackPlaying(newTracksState);
+            if (isPaused) {
+                // Utwór jest zapauzowany -> wznawiamy
+                sendPauseRequest(selectedDiscord, false);
             } else {
-                // Jeśli wznawiamy utwór (lub odpalamy pierwszy raz)
-                handlePauseToggle(selectedDiscord, false);
-                const newTracksState = isTrackPlaying.map((_, i) => i === idx);
-                setTrackPlaying(newTracksState);
+                // Utwór gra -> pauzujemy
+                sendPauseRequest(selectedDiscord, true);
             }
+        } else {
+            // Kliknięto inny utwór -> zatrzymaj poprzedni, zacznij nowy
+            setIsPaused(false);
+            setTrackPlaying(isTrackPlaying.map((_, i) => i === idx));
         }
 
-        if (!isPlayed) {
-            onPlayToggle(id);
-        }
+        if (!isPlayed) onPlayToggle(id);
     };
 
+
+
     useEffect(() => {
-        if (!isPlayed) {
-            setTrackPlaying(tracks.map(() => false));
-        }
+        if (!isPlayed) setTrackPlaying(tracks.map(() => false));
     }, [isPlayed, tracks]);
+
+    const activeTrackIdx = isTrackPlaying.findIndex(p => p === true);
 
     return (
         <div className={`bg-[#1c1b1b] border-l-4 ${colorClass} overflow-hidden transition-colors hover:bg-[#2a2a2a]`}>
@@ -174,12 +177,18 @@ const TomeItem = ({ id, title, hymns, duration, icon: Icon, colorClass, tracks, 
                 onClick={() => setExpanded(!isExpanded)}
             >
                 <div className="flex items-center gap-6">
-                    <div className={`w-16 h-16 bg-[#353534] flex items-center justify-center border-2 border-[#5b403d]`}>
+                    <div className="w-16 h-16 bg-[#353534] flex items-center justify-center border-2 border-[#5b403d]">
                         <Icon size={36} className={colorClass.replace('border-', 'text-')} />
                     </div>
                     <div>
                         <h2 className="font-serif text-3xl font-bold tracking-tight text-[#e5e2e1] uppercase">{title}</h2>
                         <p className="font-sans text-xs uppercase tracking-widest text-[#c7c6c6] opacity-60">{hymns} PIOSENEK • {duration} MIN</p>
+                        {/* Aktualnie grający utwór */}
+                        {activeTrackIdx !== -1 && (
+                            <p className="text-xs text-[#ffb59c] mt-1 animate-pulse">
+                               {trackTitle} — {formatMs(progression)} / {formatMs(trackDuration)}
+                            </p>
+                        )}
                     </div>
                 </div>
                 <ChevronDown size={28} className={`text-[#c7c6c6] transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} />
@@ -190,7 +199,7 @@ const TomeItem = ({ id, title, hymns, duration, icon: Icon, colorClass, tracks, 
                     <div className="grid grid-cols-12 gap-4 font-sans text-[10px] uppercase tracking-widest text-[#ffb59c] mb-4 px-4">
                         <div className="col-span-1">#</div>
                         <div className="col-span-3">TYTUŁ</div>
-                        <div className="col-span-5 text-center">CZAS TRWANIA</div>
+                        <div className="col-span-5 text-center">PROGRES</div>
                         <div className="col-span-2 text-right">DŁUGOŚĆ</div>
                         <div className="col-span-1 text-right">AKCJA</div>
                     </div>
@@ -202,21 +211,37 @@ const TomeItem = ({ id, title, hymns, duration, icon: Icon, colorClass, tracks, 
                                 {track.title}
                             </div>
                             <div className="col-span-5 px-4">
-                                <div className="h-1 w-full bg-[#353534] rounded-full overflow-hidden">
-                                    <div
-                                        className={`h-full transition-all duration-1000 ${isTrackPlaying[idx] ? "bg-[#ffb59c]" : "bg-transparent"}`}
-                                        style={{ width: isTrackPlaying[idx] ? `${(progression / trackDuration) * 100}%` : '0%' }}
-                                    />
-                                </div>
+                                {isTrackPlaying[idx] ? (
+                                    <div className="space-y-1">
+                                        <div className="h-1 w-full bg-[#353534] rounded-full overflow-hidden">
+                                            <div
+                                                className="h-full bg-[#ffb59c] transition-all duration-1000"
+                                                style={{ width: trackDuration > 0 ? `${(progression / trackDuration) * 100}%` : '0%' }}
+                                            />
+                                        </div>
+                                        {/* Czas aktualny / całkowity */}
+                                        <div className="flex justify-between text-[10px] text-[#c7c6c6] opacity-60">
+                                            <span>{formatMs(progression)}</span>
+                                            <span>{formatMs(trackDuration)}</span>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="h-1 w-full bg-[#353534] rounded-full" />
+                                )}
                             </div>
-                            <div className="col-span-2 text-right text-xs text-[#c7c6c6]">{track.time || "3:00"}</div>
+                            {/* Długość z API lub pusta */}
+                            <div className="col-span-2 text-right text-xs text-[#c7c6c6]">
+                                {trackDurations[idx] ? formatMs(trackDurations[idx]) : track.time || ""}
+                            </div>
                             <div className="col-span-1 text-right">
-                                {/* POPRAWKA: Przeniesienie onClick na kontener button gwarantuje poprawne przechwycenie akcji dla obu ikon */}
                                 <button
                                     className="text-[#ffb59c] hover:scale-110 transition-transform"
                                     onClick={(e) => { e.stopPropagation(); handlePlay(idx); }}
                                 >
-                                    {isTrackPlaying[idx] ? <PauseIcon size={18} /> : <PlayIcon size={18} />}
+                                    {isTrackPlaying[idx]
+                                        ? (isPaused ? <PlayIcon size={18} /> : <PauseIcon size={18} />)
+                                        : <PlayIcon size={18} />
+                                    }
                                 </button>
                             </div>
                         </div>
@@ -226,9 +251,9 @@ const TomeItem = ({ id, title, hymns, duration, icon: Icon, colorClass, tracks, 
         </div>
     );
 };
-
 export default function PlaylistSets() {
     const { id } = useParams();
+
     const playlistID = Number(id);
     const [userPlaylistSets, setUserPlaylistSets] = useState<any[]>([]);
     const [activeTomeId, setActiveTomeId] = useState<number | null>(null);
@@ -372,7 +397,7 @@ export default function PlaylistSets() {
                             id={playlist.id}
                             title={playlist.title}
                             hymns={playlist.songs?.length || 0}
-                            duration={"2:00"}
+                            duration={""}
                             icon={Castle}
                             tracks={playlist.songs || []}
                             colorClass="border-[#ffb59c]"
