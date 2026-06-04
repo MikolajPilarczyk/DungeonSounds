@@ -46,6 +46,9 @@ const TomeItem = ({ id, title, hymns, duration, icon: Icon, colorClass, tracks, 
 
 
 
+
+
+
     const [isPaused, setIsPaused] = useState(false);
 
     // Formatuje ms -> "4:03"
