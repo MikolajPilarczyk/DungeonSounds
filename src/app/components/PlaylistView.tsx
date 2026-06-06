@@ -409,6 +409,20 @@ export default function PlaylistSets() {
                             selectedDiscord={selectedDiscord}
                         />
                     ))}
+
+
+                    <div className={`bg-[#1c1b1b] border-l-4  overflow-hidden transition-colors hover:bg-[#2a2a2a]`}>
+
+                        <div className="flex items-center gap-6">
+
+                            <div>
+                                <h2 className="font-serif text-3xl font-bold tracking-tight text-[#e5e2e1] uppercase">Dodaj Piosenke</h2>
+                                <p className="font-sans text-xs uppercase tracking-widest text-[#c7c6c6] opacity-60"></p>
+
+                            </div>
+                        </div>
+
+                    </div>
                 </section>
             </main>
         </div>
