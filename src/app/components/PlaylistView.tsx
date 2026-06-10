@@ -1,11 +1,12 @@
-import { type ElementType, useEffect, useState } from 'react';
+import {type ElementType, useEffect, useRef, useState} from 'react';
 import { useParams } from "react-router-dom";
 import {
     Castle,
     ChevronDown,
     Play as PlayIcon,
     LucideStar,
-    PauseIcon
+    PauseIcon,
+    Repeat
 } from 'lucide-react';
 import { useCookies } from "react-cookie";
 
@@ -37,13 +38,14 @@ interface DiscordServer {
 
 const TomeItem = ({ id, title, hymns, duration, icon: Icon, colorClass, tracks, onPlayToggle, isPlayed, selectedDiscord }: TomeItemProps) => {
     const [isTrackPlaying, setTrackPlaying] = useState<boolean[]>(() => tracks.map(() => false));
+    const [isTrackRepeating, setTrackRepeat] = useState<boolean[]>(() => tracks.map(() => false));
     const [isExpanded, setExpanded] = useState(id === 1);
     const [trackDuration, setTrackDuration] = useState(0);
     const [trackTitle, setTrackTitle] = useState("");
     const [progression, setProgression] = useState(0);
     const [trackDurations, setTrackDurations] = useState<Record<number, number>>({}); // długość per utwór
     const [cookies] = useCookies(['userData']);
-
+    const isPausedRef = useRef<boolean>(false);
 
 
 
@@ -103,22 +105,30 @@ const TomeItem = ({ id, title, hymns, duration, icon: Icon, colorClass, tracks, 
         }
     }, [isTrackPlaying]); // odpala tylko gdy zmieni się grający utwór
 
-    // Osobny useEffect dla interwału - reaguje na trackDuration
     useEffect(() => {
         const activeTrackIdx = isTrackPlaying.findIndex(p => p === true);
         if (activeTrackIdx === -1 || trackDuration <= 0) return;
 
         const interval = setInterval(() => {
+            if (isPausedRef.current) return;
+
             setProgression(prev => {
-                const next = prev + 1000; // +1000ms co sekundę
+                const next = prev + 1000;
                 if (next >= trackDuration) {
-                    // Przejdź do następnego utworu
-                    setTrackPlaying(prevStates => {
-                        const newState = new Array(prevStates.length).fill(false);
-                        const nextIndex = activeTrackIdx + 1;
-                        if (nextIndex < prevStates.length) newState[nextIndex] = true;
-                        return newState;
-                    });
+                    if (isTrackRepeating[activeTrackIdx]) {
+                        setTrackPlaying(prevStates => {
+                            const newState = new Array(prevStates.length).fill(false);
+                            newState[activeTrackIdx] = true;
+                            return newState;
+                        });
+                    } else {
+                        setTrackPlaying(prevStates => {
+                            const newState = new Array(prevStates.length).fill(false);
+                            const nextIndex = activeTrackIdx + 1;
+                            if (nextIndex < prevStates.length) newState[nextIndex] = true;
+                            return newState;
+                        });
+                    }
                     return 0;
                 }
                 return next;
@@ -127,6 +137,8 @@ const TomeItem = ({ id, title, hymns, duration, icon: Icon, colorClass, tracks, 
 
         return () => clearInterval(interval);
     }, [trackDuration, isTrackPlaying]);
+
+
 
     const sendPauseRequest = async (guildId: string, pause: boolean) => {
         if (!guildId) return;
@@ -139,6 +151,7 @@ const TomeItem = ({ id, title, hymns, duration, icon: Icon, colorClass, tracks, 
             });
             if (response.ok) {
                 setIsPaused(pause);
+                isPausedRef.current = pause;
             }
         } catch (error) {
             console.error('Błąd kontroli odtwarzania:', error);
@@ -163,6 +176,10 @@ const TomeItem = ({ id, title, hymns, duration, icon: Icon, colorClass, tracks, 
         }
 
         if (!isPlayed) onPlayToggle(id);
+    };
+
+    const handleRepeat = (idx: number) => {
+        setTrackRepeat(prev => prev.map((_, i) => i === idx ? !prev[idx] : false));
     };
 
 
@@ -245,6 +262,12 @@ const TomeItem = ({ id, title, hymns, duration, icon: Icon, colorClass, tracks, 
                                         ? (isPaused ? <PlayIcon size={18} /> : <PauseIcon size={18} />)
                                         : <PlayIcon size={18} />
                                     }
+                                </button>
+                                <button
+                                    className="text-[#ffb59c] hover:scale-110 transition-transform ml-1"
+                                    onClick={(e) => { e.stopPropagation(); handleRepeat(idx); }}
+                                >
+                                    <Repeat size={18} className={isTrackRepeating[idx] ? "opacity-100" : "opacity-30"} />
                                 </button>
                             </div>
                         </div>
@@ -377,6 +400,9 @@ export default function PlaylistSets() {
             <main className="flex-1 max-w-7xl mx-auto px-6 pt-12 w-full">
                 <section className="mb-16 grid grid-cols-1 lg:grid-cols-2 gap-12 items-end">
                     <div>
+                        <h2 className="text-emerald-500 text-sm font-mono mb-2">
+                            Pamiętaj aby wybrać serwer na którym aktualnie przesiadujesz
+                        </h2>
                         <h2 className="text-emerald-500 text-sm font-mono mb-2">
                             {selectedDiscord ? `Wybrany serwer: ${selectedDiscordName}` : "⚠️ Wybierz serwer Discord z listy po lewej"}
                         </h2>
