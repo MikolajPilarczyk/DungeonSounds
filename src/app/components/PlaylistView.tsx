@@ -1,12 +1,14 @@
 import {type ElementType, useEffect, useRef, useState} from 'react';
 import { useParams } from "react-router-dom";
+import {MainButton} from "./components.tsx";
 import {
     Castle,
     ChevronDown,
     Play as PlayIcon,
     LucideStar,
     PauseIcon,
-    Repeat
+    Repeat,
+    Plus
 } from 'lucide-react';
 import { useCookies } from "react-cookie";
 
@@ -47,6 +49,11 @@ const TomeItem = ({ id, title, hymns, duration, icon: Icon, colorClass, tracks, 
     const [cookies] = useCookies(['userData']);
     const isPausedRef = useRef<boolean>(false);
 
+
+
+    // adding song variables
+
+    const [isAdding, setIsAdding] = useState(false);
 
 
 
@@ -272,6 +279,46 @@ const TomeItem = ({ id, title, hymns, duration, icon: Icon, colorClass, tracks, 
                             </div>
                         </div>
                     ))}
+                    <div className="flex min-h-[80px] items-center justify-between border-1 border-[#ffb59c]/20 bg-[#1e1e1e] p-5 transition-all duration-300 hover:scale-[1.01] hover:border-[#ffb59c]">
+
+                        {/* Lewa strona: Klikalny przycisk otwierający */}
+                        <div
+                            className="flex shrink-0 cursor-pointer items-center space-x-3 text-white transition-colors hover:text-[#ffb59c]"
+                            onClick={() => setIsAdding(!isAdding)}
+                        >
+                            <Plus
+                                size={25}
+                                className={`text-[#ffb59c] transition-transform duration-300 ${isAdding ? "rotate-45" : ""}`}
+                            />
+                            <p className="font-medium select-none">Dodaj Piosenkę</p>
+                        </div>
+
+                        {/* Prawa strona: Formularz z płynną animacją rozwijania */}
+                        <div className={`flex items-center space-x-4 transition-all duration-300 ease-in-out origin-right ${
+                            isAdding
+                                ? "max-w-4xl opacity-100 translate-x-0"
+                                : "max-w-0 opacity-0 translate-x-4 pointer-events-none overflow-hidden"
+                        }`}>
+                            <input
+                                className="h-11 w-64 border-none bg-[#353534] px-4 text-on-surface transition-all placeholder:text-outline focus:outline-none focus:ring-1 focus:ring-[#ffb59c]"
+                                name="title"
+                                placeholder="Wpisz tytuł"
+                                type="text"
+                            />
+
+                            <input
+                                className="h-11 w-80 border-none bg-[#353534] px-4 text-on-surface transition-all placeholder:text-outline focus:outline-none focus:ring-1 focus:ring-[#ffb59c]"
+                                name="url"
+                                placeholder="Link z soundcloud"
+                                type="text"
+                            />
+
+                            <button className="flex h-11 items-center bg-[#ffb59c] px-6 font-medium text-black transition-colors hover:bg-[#ffb59c]/80">
+                                Dodaj
+                            </button>
+                        </div>
+
+                    </div>
                 </div>
             )}
         </div>
@@ -400,12 +447,13 @@ export default function PlaylistSets() {
             <main className="flex-1 max-w-7xl mx-auto px-6 pt-12 w-full">
                 <section className="mb-16 grid grid-cols-1 lg:grid-cols-2 gap-12 items-end">
                     <div>
-                        <h2 className="text-emerald-500 text-sm font-mono mb-2">
-                            Pamiętaj aby wybrać serwer na którym aktualnie przesiadujesz
-                        </h2>
+
                         <h2 className="text-emerald-500 text-sm font-mono mb-2">
                             {selectedDiscord ? `Wybrany serwer: ${selectedDiscordName}` : "⚠️ Wybierz serwer Discord z listy po lewej"}
                         </h2>
+                        <h3 className="text-red-500 text-sm font-mono mb-2">
+                            Pamiętaj aby wybrać serwer na którym aktualnie przesiadujesz
+                        </h3>
                         <h1 className="text-6xl lg:text-8xl font-black mb-4 font-serif">{userPlaylistSets[0]?.title}</h1>
                         <p className="text-xl text-[#c7c6c6]">{userPlaylistSets[0]?.description}</p>
                     </div>
@@ -442,7 +490,7 @@ export default function PlaylistSets() {
                         <div className="flex items-center gap-6">
 
                             <div>
-                                <h2 className="font-serif text-3xl font-bold tracking-tight text-[#e5e2e1] uppercase">Dodaj Piosenke</h2>
+                                <h2 className="font-serif text-3xl font-bold tracking-tight text-[#e5e2e1] uppercase">Dodaj Playliste</h2>
                                 <p className="font-sans text-xs uppercase tracking-widest text-[#c7c6c6] opacity-60"></p>
 
                             </div>
