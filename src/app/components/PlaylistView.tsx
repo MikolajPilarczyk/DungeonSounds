@@ -38,7 +38,15 @@ interface DiscordServer {
     serverIconUrl: string;
 }
 
+interface Song
+{
+    title: string;
+    url: string;
+}
+
 const TomeItem = ({ id, title, hymns, duration, icon: Icon, colorClass, tracks, onPlayToggle, isPlayed, selectedDiscord }: TomeItemProps) => {
+    const playlistId = id
+
     const [isTrackPlaying, setTrackPlaying] = useState<boolean[]>(() => tracks.map(() => false));
     const [isTrackRepeating, setTrackRepeat] = useState<boolean[]>(() => tracks.map(() => false));
     const [isExpanded, setExpanded] = useState(id === 1);
@@ -191,6 +199,26 @@ const TomeItem = ({ id, title, hymns, duration, icon: Icon, colorClass, tracks, 
 
 
 
+    const [songTitle, setSongTitle] = useState("")
+    const [songUrl, setSongUrl] = useState("")
+
+    const handleSongToAddChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if(e.target.name === "title") {
+
+            setSongTitle(e.target.value);
+        }
+        else if(e.target.name === "url") {
+            setSongUrl(e.target.value);
+        }
+
+    }
+
+    const handleAddSong = (id: number,e:any) => {
+        e.preventDefault();
+        console.log(id,songTitle,songUrl);
+
+    }
+
     useEffect(() => {
         if (!isPlayed) setTrackPlaying(tracks.map(() => false));
     }, [isPlayed, tracks]);
@@ -304,6 +332,8 @@ const TomeItem = ({ id, title, hymns, duration, icon: Icon, colorClass, tracks, 
                                 name="title"
                                 placeholder="Wpisz tytuł"
                                 type="text"
+                                onChange={handleSongToAddChange}
+
                             />
 
                             <input
@@ -311,9 +341,10 @@ const TomeItem = ({ id, title, hymns, duration, icon: Icon, colorClass, tracks, 
                                 name="url"
                                 placeholder="Link z soundcloud"
                                 type="text"
+                                onChange={handleSongToAddChange}
                             />
 
-                            <button className="flex h-11 items-center bg-[#ffb59c] px-6 font-medium text-black transition-colors hover:bg-[#ffb59c]/80">
+                            <button className="flex h-11 items-center bg-[#ffb59c] px-6 font-medium text-black transition-colors hover:bg-[#ffb59c]/80" onClick={e=>handleAddSong(playlistId,e)}>
                                 Dodaj
                             </button>
                         </div>
