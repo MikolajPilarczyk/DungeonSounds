@@ -30,6 +30,7 @@ interface TomeItemProps {
     onPlayToggle: (id: number) => void;
     isPlayed: boolean;
     selectedDiscord: string;
+    onSongAdded: (playlistId: number, newSong: Track) => void;
 }
 
 interface DiscordServer {
@@ -44,7 +45,7 @@ interface Song
     url: string;
 }
 
-const TomeItem = ({ id, title, hymns, duration, icon: Icon, colorClass, tracks, onPlayToggle, isPlayed, selectedDiscord }: TomeItemProps) => {
+const TomeItem = ({ id, title, hymns, duration, icon: Icon, colorClass, tracks, onPlayToggle, isPlayed, selectedDiscord, onSongAdded }: TomeItemProps) => {
     const playlistId = id
 
     const [isTrackPlaying, setTrackPlaying] = useState<boolean[]>(() => tracks.map(() => false));
@@ -53,28 +54,34 @@ const TomeItem = ({ id, title, hymns, duration, icon: Icon, colorClass, tracks, 
     const [trackDuration, setTrackDuration] = useState(0);
     const [trackTitle, setTrackTitle] = useState("");
     const [progression, setProgression] = useState(0);
-    const [trackDurations, setTrackDurations] = useState<Record<number, number>>({}); // długość per utwór
+    const [trackDurations, setTrackDurations] = useState<Record<number, number>>({});
     const [cookies] = useCookies(['userData']);
     const isPausedRef = useRef<boolean>(false);
 
-
-
-    // adding song variables
-
     const [isAdding, setIsAdding] = useState(false);
-
-
-
-
     const [isPaused, setIsPaused] = useState(false);
 
-    // Formatuje ms -> "4:03"
     const formatMs = (ms: number): string => {
         if (!ms || ms <= 0) return "--:--";
         const minutes = Math.floor(ms / 60000);
         const seconds = Math.floor((ms % 60000) / 1000);
         return `${minutes}:${seconds.toString().padStart(2, '0')}`;
     };
+
+    useEffect(() => {
+        setTrackPlaying(prev => {
+            if (prev.length === tracks.length) return prev;
+            const next = [...prev];
+            while (next.length < tracks.length) next.push(false);
+            return next;
+        });
+        setTrackRepeat(prev => {
+            if (prev.length === tracks.length) return prev;
+            const next = [...prev];
+            while (next.length < tracks.length) next.push(false);
+            return next;
+        });
+    }, [tracks]);
 
     useEffect(() => {
         const playSong = async (activeTrackIdx: number) => {
@@ -100,11 +107,10 @@ const TomeItem = ({ id, title, hymns, duration, icon: Icon, colorClass, tracks, 
                 const data = await response.json();
                 const ms = parseInt(data.durationMs);
 
-                // Zapisz długość dla konkretnego tracka
                 setTrackDurations(prev => ({ ...prev, [activeTrackIdx]: ms }));
                 setTrackDuration(ms);
                 setTrackTitle(data.title);
-                setProgression(0); // reset paska po załadowaniu
+                setProgression(0);
 
             } catch (error) {
                 console.error('Błąd podczas puszczania muzyki:', error);
@@ -118,7 +124,7 @@ const TomeItem = ({ id, title, hymns, duration, icon: Icon, colorClass, tracks, 
         } else {
             setProgression(0);
         }
-    }, [isTrackPlaying]); // odpala tylko gdy zmieni się grający utwór
+    }, [isTrackPlaying, tracks]);
 
     useEffect(() => {
         const activeTrackIdx = isTrackPlaying.findIndex(p => p === true);
@@ -151,9 +157,7 @@ const TomeItem = ({ id, title, hymns, duration, icon: Icon, colorClass, tracks, 
         }, 1000);
 
         return () => clearInterval(interval);
-    }, [trackDuration, isTrackPlaying]);
-
-
+    }, [trackDuration, isTrackPlaying, isTrackRepeating]);
 
     const sendPauseRequest = async (guildId: string, pause: boolean) => {
         if (!guildId) return;
@@ -178,14 +182,11 @@ const TomeItem = ({ id, title, hymns, duration, icon: Icon, colorClass, tracks, 
 
         if (isCurrentTrackPlaying) {
             if (isPaused) {
-                // Utwór jest zapauzowany -> wznawiamy
                 sendPauseRequest(selectedDiscord, false);
             } else {
-                // Utwór gra -> pauzujemy
                 sendPauseRequest(selectedDiscord, true);
             }
         } else {
-            // Kliknięto inny utwór -> zatrzymaj poprzedni, zacznij nowy
             setIsPaused(false);
             setTrackPlaying(isTrackPlaying.map((_, i) => i === idx));
         }
@@ -197,26 +198,48 @@ const TomeItem = ({ id, title, hymns, duration, icon: Icon, colorClass, tracks, 
         setTrackRepeat(prev => prev.map((_, i) => i === idx ? !prev[idx] : false));
     };
 
-
-
     const [songTitle, setSongTitle] = useState("")
     const [songUrl, setSongUrl] = useState("")
 
     const handleSongToAddChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if(e.target.name === "title") {
-
             setSongTitle(e.target.value);
         }
         else if(e.target.name === "url") {
             setSongUrl(e.target.value);
         }
-
     }
 
-    const handleAddSong = (id: number,e:any) => {
+    const handleAddSong =  async (id: number, e: any) => {
         e.preventDefault();
-        console.log(id,songTitle,songUrl);
+        if (!songTitle || !songUrl) return;
 
+        try {
+            const response = await fetch(`http://localhost:8080/api/add-song`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ playlistId: id, title: songTitle, url: songUrl }),
+            });
+            if (response.ok) {
+                const responseText = await response.text();
+                const newSongId = Number(responseText);
+
+                const newTrack: Track = {
+                    id: newSongId,
+                    title: songTitle,
+                    url: songUrl
+                };
+
+                onSongAdded(id, newTrack);
+                alert("Dodano poprawnie");
+
+                setSongTitle("");
+                setSongUrl("");
+                setIsAdding(false);
+            }
+        } catch (error) {
+            console.error('Błąd kontroli odtwarzania:', error);
+        }
     }
 
     useEffect(() => {
@@ -238,10 +261,9 @@ const TomeItem = ({ id, title, hymns, duration, icon: Icon, colorClass, tracks, 
                     <div>
                         <h2 className="font-serif text-3xl font-bold tracking-tight text-[#e5e2e1] uppercase">{title}</h2>
                         <p className="font-sans text-xs uppercase tracking-widest text-[#c7c6c6] opacity-60">{hymns} PIOSENEK • {duration} MIN</p>
-                        {/* Aktualnie grający utwór */}
                         {activeTrackIdx !== -1 && (
                             <p className="text-xs text-[#ffb59c] mt-1 animate-pulse">
-                               {trackTitle} — {formatMs(progression)} / {formatMs(trackDuration)}
+                                {trackTitle} — {formatMs(progression)} / {formatMs(trackDuration)}
                             </p>
                         )}
                     </div>
@@ -274,7 +296,6 @@ const TomeItem = ({ id, title, hymns, duration, icon: Icon, colorClass, tracks, 
                                                 style={{ width: trackDuration > 0 ? `${(progression / trackDuration) * 100}%` : '0%' }}
                                             />
                                         </div>
-                                        {/* Czas aktualny / całkowity */}
                                         <div className="flex justify-between text-[10px] text-[#c7c6c6] opacity-60">
                                             <span>{formatMs(progression)}</span>
                                             <span>{formatMs(trackDuration)}</span>
@@ -284,7 +305,6 @@ const TomeItem = ({ id, title, hymns, duration, icon: Icon, colorClass, tracks, 
                                     <div className="h-1 w-full bg-[#353534] rounded-full" />
                                 )}
                             </div>
-                            {/* Długość z API lub pusta */}
                             <div className="col-span-2 text-right text-xs text-[#c7c6c6]">
                                 {trackDurations[idx] ? formatMs(trackDurations[idx]) : track.time || ""}
                             </div>
@@ -309,7 +329,6 @@ const TomeItem = ({ id, title, hymns, duration, icon: Icon, colorClass, tracks, 
                     ))}
                     <div className="flex min-h-[80px] items-center justify-between border-1 border-[#ffb59c]/20 bg-[#1e1e1e] p-5 transition-all duration-300 hover:scale-[1.01] hover:border-[#ffb59c]">
 
-                        {/* Lewa strona: Klikalny przycisk otwierający */}
                         <div
                             className="flex shrink-0 cursor-pointer items-center space-x-3 text-white transition-colors hover:text-[#ffb59c]"
                             onClick={() => setIsAdding(!isAdding)}
@@ -321,7 +340,6 @@ const TomeItem = ({ id, title, hymns, duration, icon: Icon, colorClass, tracks, 
                             <p className="font-medium select-none">Dodaj Piosenkę</p>
                         </div>
 
-                        {/* Prawa strona: Formularz z płynną animacją rozwijania */}
                         <div className={`flex items-center space-x-4 transition-all duration-300 ease-in-out origin-right ${
                             isAdding
                                 ? "max-w-4xl opacity-100 translate-x-0"
@@ -332,8 +350,8 @@ const TomeItem = ({ id, title, hymns, duration, icon: Icon, colorClass, tracks, 
                                 name="title"
                                 placeholder="Wpisz tytuł"
                                 type="text"
+                                value={songTitle}
                                 onChange={handleSongToAddChange}
-
                             />
 
                             <input
@@ -341,6 +359,7 @@ const TomeItem = ({ id, title, hymns, duration, icon: Icon, colorClass, tracks, 
                                 name="url"
                                 placeholder="Link z soundcloud"
                                 type="text"
+                                value={songUrl}
                                 onChange={handleSongToAddChange}
                             />
 
@@ -355,6 +374,7 @@ const TomeItem = ({ id, title, hymns, duration, icon: Icon, colorClass, tracks, 
         </div>
     );
 };
+
 export default function PlaylistSets() {
     const { id } = useParams();
 
@@ -451,6 +471,28 @@ export default function PlaylistSets() {
         setActiveTomeId(prev => prev === playlistId ? null : playlistId);
     };
 
+    const onSongAdded = (playlistId: number, newSong: Track) => {
+        setUserPlaylistSets(prevSets => {
+            if (prevSets.length === 0) return prevSets;
+
+            const updatedPlaylists = prevSets[0].playlists.map((playlist: any) => {
+                if (playlist.id === playlistId) {
+                    const currentSongs = playlist.songs || [];
+                    return {
+                        ...playlist,
+                        songs: [...currentSongs, newSong]
+                    };
+                }
+                return playlist;
+            });
+
+            return [{
+                ...prevSets[0],
+                playlists: updatedPlaylists
+            }];
+        });
+    };
+
     return (
         <div className="bg-[#131313] text-[#e5e2e1] min-h-screen pb-32 mt-20 flex flex-col md:flex-row">
             <aside className="flex flex-row md:flex-col items-center p-4 bg-[#0f0f0f] md:min-h-screen border-b md:border-b-0 md:border-r border-zinc-800 self-start sticky top-20 z-10 w-full md:w-auto overflow-x-auto md:overflow-x-visible">
@@ -478,7 +520,6 @@ export default function PlaylistSets() {
             <main className="flex-1 max-w-7xl mx-auto px-6 pt-12 w-full">
                 <section className="mb-16 grid grid-cols-1 lg:grid-cols-2 gap-12 items-end">
                     <div>
-
                         <h2 className="text-emerald-500 text-sm font-mono mb-2">
                             {selectedDiscord ? `Wybrany serwer: ${selectedDiscordName}` : "⚠️ Wybierz serwer Discord z listy po lewej"}
                         </h2>
@@ -512,21 +553,17 @@ export default function PlaylistSets() {
                             onPlayToggle={onPlayToggle}
                             isPlayed={activeTomeId === playlist.id}
                             selectedDiscord={selectedDiscord}
+                            onSongAdded={onSongAdded}
                         />
                     ))}
 
-
                     <div className={`bg-[#1c1b1b] border-l-4  overflow-hidden transition-colors hover:bg-[#2a2a2a]`}>
-
                         <div className="flex items-center gap-6">
-
                             <div>
                                 <h2 className="font-serif text-3xl font-bold tracking-tight text-[#e5e2e1] uppercase">Dodaj Playliste</h2>
                                 <p className="font-sans text-xs uppercase tracking-widest text-[#c7c6c6] opacity-60"></p>
-
                             </div>
                         </div>
-
                     </div>
                 </section>
             </main>
