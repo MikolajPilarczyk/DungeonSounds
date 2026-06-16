@@ -14,10 +14,10 @@ export function MainLoginPage() {
                         <div className="space-y-2 text-center">
                             <div className="flex items-center justify-center gap-2 text-[#ffb59c]">
                                 <Swords className="w-5 h-5 animate-pulse" />
-                                <span className="text-xs uppercase tracking-[0.2em] font-sans text-[#8b8b8b]">Brama Wyborna</span>
+                                <span className="text-xs uppercase tracking-[0.2em] font-sans text-[#8b8b8b]">Brama Wschód</span>
                             </div>
-                            <h2 className="text-3xl text-[#ffb59c] font-serif tracking-wide">Dołącz do Drużyny</h2>
-                            <p className="text-[#8b8b8b] text-sm font-sans">Zaloguj się, aby zarządzać dźwiękami swoich lochów.</p>
+                            <h2 className="text-3xl text-[#ffb59c] font-serif tracking-wide">Aby wyruszyć w drogę należy zebrać drużyne</h2>
+                            <p className="text-[#8b8b8b] text-sm font-sans">Zaloguj się, za pomocą discorda aby zarządzać muzyką na swojej sesji na discordzie.</p>
                         </div>
 
                         {/* Przycisk Discorda */}
@@ -27,7 +27,7 @@ export function MainLoginPage() {
                                 className="flex items-center justify-center gap-3 w-full bg-[#5865F2] hover:bg-[#4752C4] text-white font-sans font-medium py-4 px-6 tracking-wide transition-all duration-300 transform hover:-translate-y-1 shadow-[0_4px_20px_rgba(88,101,242,0.3)] hover:shadow-[0_4px_25px_rgba(88,101,242,0.5)] group"
                             >
                                 <Disc className="w-6 h-6 transition-transform duration-500 group-hover:rotate-[360deg]" />
-                                <span>Wejdź przez Discord</span>
+                                <span>Zaloguj się przez Discord</span>
                             </a>
 
                         </div>
