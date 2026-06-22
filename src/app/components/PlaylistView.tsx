@@ -493,6 +493,8 @@ export default function PlaylistSets() {
         });
     };
 
+
+    const [isAddingPLaylist, setIsAddingPLaylist] = useState(false  );
     return (
         <div className="bg-[#131313] text-[#e5e2e1] min-h-screen pb-32 mt-20 flex flex-col md:flex-row">
             <aside className="flex flex-row md:flex-col items-center p-4 bg-[#0f0f0f] md:min-h-screen border-b md:border-b-0 md:border-r border-zinc-800 self-start sticky top-20 z-10 w-full md:w-auto overflow-x-auto md:overflow-x-visible">
@@ -557,12 +559,34 @@ export default function PlaylistSets() {
                         />
                     ))}
 
-                    <div className={`bg-[#1c1b1b] border-l-4  overflow-hidden transition-colors hover:bg-[#2a2a2a]`}>
+                    <div className={`bg-[#1c1b1b] border-l-4 p-5 overflow-hidden transition-colors hover:bg-[#2a2a2a] border-2 border-l-[#ffb59c]`}>
                         <div className="flex items-center gap-6">
-                            <div>
-                                <h2 className="font-serif text-3xl font-bold tracking-tight text-[#e5e2e1] uppercase">Dodaj Playliste</h2>
-                                <p className="font-sans text-xs uppercase tracking-widest text-[#c7c6c6] opacity-60"></p>
-                            </div>
+                            {
+                                isAddingPLaylist?
+                                    ( <div>
+                                        <div
+                                            className="flex shrink-0 cursor-pointer items-center space-x-3 text-white transition-colors hover:text-[#ffb59c]"
+                                        >
+                                            <Plus
+                                                size={25}
+                                                className={`text-[#ffb59c] transition-transform duration-300 `}
+                                            />
+                                            <p className="font-medium select-none">Dodaj Playliste</p>
+                                        </div>
+                                    </div>):(
+                                        <div>
+                                            <div
+                                                className="flex shrink-0 cursor-pointer items-center space-x-3 text-white transition-colors hover:text-[#ffb59c]"
+                                            >
+                                                <Plus
+                                                    size={25}
+                                                    className={`text-[#ffb59c] transition-transform duration-300 `}
+                                                />
+                                                <p className="font-medium select-none">Dodaj Playliste</p>
+                                            </div>
+                                        </div>
+                                    )
+                            }
                         </div>
                     </div>
                 </section>
