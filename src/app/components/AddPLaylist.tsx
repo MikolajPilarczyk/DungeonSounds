@@ -1,7 +1,7 @@
 import { BookAudio, AudioLines, Trash } from "lucide-react";
 import { useState } from "react";
 
-export function AddPLaylist() {
+export function AddPLaylist(playlistSetId:any) {
     interface Song {
         title: string;
         url: string;
@@ -79,7 +79,7 @@ export function AddPLaylist() {
             return;
         }
 
-        console.log("Wysyłam playlistę:", playlist);
+        console.log("Wysyłam playlistę:", playlist,"id:", playlistSetId);
 
         try {
             const response = await fetch('http://localhost:8080/api/upload/playlist', {
@@ -87,7 +87,7 @@ export function AddPLaylist() {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(playlist),
+                body: JSON.stringify(playlist,playlistSetId),
             });
 
             if (response.ok) {
@@ -102,14 +102,14 @@ export function AddPLaylist() {
     };
 
     return (
-        <div className="w-full max-w-2xl  p-8 rounded-lg  self-start">
+        <div className="w-full max-w-2xl pl-6  p-2 rounded-lg  self-start">
 
 
 
 
             <div className="space-y-6">
                 <div className="space-y-2">
-                    <label className="text-xs font-bold uppercase tracking-wider text-gray-400">Nazwa Playlisty</label>
+                    <h2 className="text-sm font-bold uppercase tracking-wider text-gray-400">Nazwa Playlisty</h2>
                     <input
                         className="w-full bg-[#353534] border-none px-4 py-3 text-white placeholder:text-gray-500 focus:ring-2 focus:ring-[#ffb59c]/50 transition-all rounded-sm"
                         value={playlist.title}

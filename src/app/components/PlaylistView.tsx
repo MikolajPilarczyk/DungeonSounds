@@ -555,7 +555,7 @@ export default function PlaylistSets() {
                             colorClass="border-[#ffb59c]"
                             onPlayToggle={onPlayToggle}
                             isPlayed={activeTomeId === playlist.id}
-                            selectedDiscord={selectedDiscord}
+                            selectedDiscord={selectedDiscord}x
                             onSongAdded={onSongAdded}
                         />
                     ))}
@@ -576,7 +576,7 @@ export default function PlaylistSets() {
                                             <p className="font-medium select-none">Anuluj</p>
 
                                         </div>
-                                        <AddPLaylist/>
+                                        <AddPLaylist playlistSetId={userPlaylistSets[0]?.id} />
 
                                     </div>):(
                                         <div>
