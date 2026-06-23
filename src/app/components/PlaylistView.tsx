@@ -1,6 +1,7 @@
 import {type ElementType, useEffect, useRef, useState} from 'react';
 import { useParams } from "react-router-dom";
-import {MainButton} from "./components.tsx";
+import {AddPLaylist} from "./AddPLaylist.tsx";
+
 import {
     Castle,
     ChevronDown,
@@ -559,24 +560,30 @@ export default function PlaylistSets() {
                         />
                     ))}
 
-                    <div className={`bg-[#1c1b1b] border-l-4 p-5 overflow-hidden transition-colors hover:bg-[#2a2a2a] border-2 border-l-[#ffb59c]`}>
+                    <div className={`bg-[#1c1b1b] border-l-4 p-5 overflow-hidden transition-colors  border-2 border-l-[#ffb59c]`}>
                         <div className="flex items-center gap-6">
                             {
                                 isAddingPLaylist?
                                     ( <div>
                                         <div
-                                            className="flex shrink-0 cursor-pointer items-center space-x-3 text-white transition-colors hover:text-[#ffb59c]"
+                                            className="flex shrink-0 cursor-pointer items-center space-x-3 text-white transition-colors hover:text-[#ffb59c] mb-5"
+                                            onClick={e=>setIsAddingPLaylist(false)}
                                         >
                                             <Plus
                                                 size={25}
-                                                className={`text-[#ffb59c] transition-transform duration-300 `}
+                                                className={`text-[#ffb59c] transition-transform duration-300 rotate-45 transition-all duration-200`}
                                             />
-                                            <p className="font-medium select-none">Dodaj Playliste</p>
+                                            <p className="font-medium select-none">Anuluj</p>
+
                                         </div>
+                                        <AddPLaylist/>
+
                                     </div>):(
                                         <div>
                                             <div
                                                 className="flex shrink-0 cursor-pointer items-center space-x-3 text-white transition-colors hover:text-[#ffb59c]"
+                                                onClick={e=>setIsAddingPLaylist(true)}
+
                                             >
                                                 <Plus
                                                     size={25}
