@@ -1,7 +1,10 @@
 import { BookAudio, AudioLines, Trash } from "lucide-react";
 import { useState } from "react";
 
-export function AddPLaylist(playlistSetId:any) {
+export function AddPLaylist({ playlistSetId }: { playlistSetId: number }) {
+
+    const playlistId = playlistSetId;
+
     interface Song {
         title: string;
         url: string;
@@ -14,7 +17,7 @@ export function AddPLaylist(playlistSetId:any) {
 
     const [playlist, setPlaylist] = useState<PlaylistData>({
         title: "",
-        songs: []
+        songs: [],
     });
 
     const [urlError, setUrlError] = useState<string | null>(null);
@@ -87,11 +90,15 @@ export function AddPLaylist(playlistSetId:any) {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(playlist,playlistSetId),
+                body: JSON.stringify({
+                    title: playlist.title,
+                    songs: playlist.songs,
+                    playlistSetId: Number(playlistId)
+                }),
             });
 
             if (response.ok) {
-                alert("Playlista została pomyślnie dodana!");
+                alert("Playlista została pomyślnie dodana, Odświerz strone aby ją zobaczyć!");
                 setPlaylist({ title: "", songs: [] }); // Reset po sukcesie
             } else {
                 alert("Wystąpił błąd podczas zapisywania playlisty.");
